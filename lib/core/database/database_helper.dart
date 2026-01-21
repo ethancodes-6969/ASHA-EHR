@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
   static const _databaseName = "asha_ehr.db";
-  static const _databaseVersion = 1;
+  static const _databaseVersion = 2; // Bumped version
 
   Database? _database;
 
@@ -21,10 +21,18 @@ class DatabaseHelper {
       path,
       version: _databaseVersion,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
+      onConfigure: _onConfigure,
     );
+  }
+  
+  // Enable foreign keys
+  Future<void> _onConfigure(Database db) async {
+    await db.execute('PRAGMA foreign_keys = ON');
   }
 
   Future<void> _onCreate(Database db, int version) async {
+    // V1
     await db.execute('''
       CREATE TABLE households (
         id TEXT PRIMARY KEY,
@@ -35,5 +43,36 @@ class DatabaseHelper {
         is_dirty INTEGER DEFAULT 1
       )
     ''');
+    
+    // V2 (if creating fresh, do it all here)
+    if (version >= 2) {
+       await _createMembersTable(db);
+    }
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await _createMembersTable(db);
+    }
+  }
+
+  Future<void> _createMembersTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE members (
+        id TEXT PRIMARY KEY,
+        household_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        gender TEXT NOT NULL,
+        date_of_birth INTEGER NOT NULL,
+        id_proof_number TEXT,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        is_dirty INTEGER DEFAULT 1,
+        FOREIGN KEY(household_id) REFERENCES households(id)
+      )
+    ''');
+    
+    // Index for fast lookups by household
+    await db.execute('CREATE INDEX idx_members_household_id ON members(household_id)');
   }
 }

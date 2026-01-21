@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:asha_ehr/core/di/service_locator.dart';
 import 'package:asha_ehr/presentation/home/home_view_model.dart';
 import 'package:asha_ehr/presentation/create_household/create_household_screen.dart';
+import 'package:asha_ehr/presentation/members/member_list_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -44,6 +45,17 @@ class _HomeContent extends StatelessWidget {
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Text(household.locationDescription),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MemberListScreen(
+                                householdId: household.id,
+                                householdName: household.familyHeadName,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     );
                   },
