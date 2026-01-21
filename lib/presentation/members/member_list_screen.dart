@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:asha_ehr/core/di/service_locator.dart';
 import 'package:asha_ehr/presentation/members/member_list_view_model.dart';
 import 'package:asha_ehr/presentation/create_member/create_member_screen.dart';
+import 'package:asha_ehr/presentation/visits/visit_list_screen.dart';
 
 class MemberListScreen extends StatelessWidget {
   final String householdId;
@@ -66,6 +67,17 @@ class _MemberContent extends StatelessWidget {
                       ),
                       title: Text(member.name),
                       subtitle: Text("DOB: ${_formatDate(member.dateOfBirth)}"),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => VisitListScreen(
+                              memberId: member.id,
+                              memberName: member.name,
+                            ),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),
