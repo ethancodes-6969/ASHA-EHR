@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
   static const _databaseName = "asha_ehr.db";
-  static const _databaseVersion = 3; // Bumped version
+  static const _databaseVersion = 4; // Bumped version
 
   Database? _database;
 
@@ -53,6 +53,11 @@ class DatabaseHelper {
     if (version >= 3) {
       await _createVisitsTable(db);
     }
+
+    // V4
+    if (version >= 4) {
+      await _createDueItemsTable(db);
+    }
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -61,6 +66,9 @@ class DatabaseHelper {
     }
     if (oldVersion < 3) {
       await _createVisitsTable(db);
+    }
+    if (oldVersion < 4) {
+      await _createDueItemsTable(db);
     }
   }
 
@@ -102,5 +110,21 @@ class DatabaseHelper {
 
     // Index for fast lookups by member
     await db.execute('CREATE INDEX idx_visits_member_id ON visits(member_id)');
+  }
+
+  Future<void> _createDueItemsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE due_items (
+        id TEXT PRIMARY KEY,
+        member_id TEXT NOT NULL,
+        member_name TEXT NOT NULL,
+        household_location TEXT,
+        core_category TEXT NOT NULL,
+        program_tag TEXT NOT NULL,
+        due_date INTEGER NOT NULL,
+        generated_at INTEGER NOT NULL
+      )
+    ''');
+    await db.execute('CREATE INDEX idx_due_items_date ON due_items(due_date)');
   }
 }

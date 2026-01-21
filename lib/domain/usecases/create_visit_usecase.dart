@@ -1,11 +1,13 @@
 import 'package:asha_ehr/domain/entities/visit.dart';
 import 'package:asha_ehr/domain/repositories/i_visit_repository.dart';
+import 'package:asha_ehr/domain/usecases/regenerate_due_list_usecase.dart';
 import 'package:uuid/uuid.dart';
 
 class CreateVisitUseCase {
   final IVisitRepository repository;
+  final RegenerateDueListUseCase regenerateDueListUseCase;
 
-  CreateVisitUseCase(this.repository);
+  CreateVisitUseCase(this.repository, this.regenerateDueListUseCase);
 
   Future<void> call({
     required String memberId,
@@ -29,5 +31,8 @@ class CreateVisitUseCase {
     );
 
     await repository.saveVisit(visit);
+    
+    // Trigger regeneration
+    await regenerateDueListUseCase();
   }
 }

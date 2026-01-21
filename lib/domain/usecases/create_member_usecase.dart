@@ -1,12 +1,14 @@
 
 import 'package:asha_ehr/domain/entities/member.dart';
 import 'package:asha_ehr/domain/repositories/i_member_repository.dart';
+import 'package:asha_ehr/domain/usecases/regenerate_due_list_usecase.dart';
 import 'package:uuid/uuid.dart';
 
 class CreateMemberUseCase {
   final IMemberRepository repository;
+  final RegenerateDueListUseCase regenerateDueListUseCase;
 
-  CreateMemberUseCase(this.repository);
+  CreateMemberUseCase(this.repository, this.regenerateDueListUseCase);
 
   Future<void> call({
     required String householdId,
@@ -30,5 +32,6 @@ class CreateMemberUseCase {
     );
 
     await repository.saveMember(member);
+    await regenerateDueListUseCase();
   }
 }

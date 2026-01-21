@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:asha_ehr/presentation/home/home_screen.dart';
+import 'package:asha_ehr/presentation/dashboard/dashboard_screen.dart';
 
 class AshaApp extends StatelessWidget {
   const AshaApp({super.key});
@@ -12,7 +12,7 @@ class AshaApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
+      home: const DashboardScreen(),
     );
   }
 }
