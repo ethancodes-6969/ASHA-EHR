@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "257077022427",
+    "project_id": "ashaehr02",
+    "storage_bucket": "ashaehr02.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:257077022427:android:369f0ec685edf56b1dc6fe",
+        "android_client_info": {
+          "package_name": "com.asha.ehr.asha_ehr"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAEsGQ824bT3UNKOT2EtnqHlj4KzXCZqA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

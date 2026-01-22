@@ -22,12 +22,19 @@ import 'package:asha_ehr/domain/usecases/get_dashboard_stats_usecase.dart';
 import 'package:asha_ehr/domain/usecases/get_all_due_items_usecase.dart';
 import 'package:asha_ehr/presentation/dashboard/dashboard_view_model.dart';
 import 'package:asha_ehr/presentation/due_list/due_list_view_model.dart';
+import 'package:asha_ehr/core/sync/device_attributes.dart';
+import 'package:asha_ehr/data/remote/firestore_helper.dart';
+import 'package:asha_ehr/data/repositories/sync_repository_impl.dart';
+import 'package:asha_ehr/domain/repositories/i_sync_repository.dart';
+import 'package:asha_ehr/presentation/sync/sync_view_model.dart';
 
 final getIt = GetIt.instance;
 
 void setupServiceLocator() {
   // Core
   getIt.registerLazySingleton(() => DatabaseHelper());
+  getIt.registerLazySingleton(() => DeviceAttributes(getIt()));
+  getIt.registerLazySingleton(() => FirestoreHelper());
 
   // Repositories
   getIt.registerLazySingleton<IHouseholdRepository>(
@@ -64,6 +71,13 @@ void setupServiceLocator() {
   getIt.registerLazySingleton<IDueListRepository>(
     () => DueListRepositoryImpl(getIt()),
   );
+  getIt.registerLazySingleton<ISyncRepository>(
+    () => SyncRepositoryImpl(
+      dbHelper: getIt(),
+      firestoreHelper: getIt(),
+      deviceAttributes: getIt(),
+    ),
+  );
 
   // ViewModels
   getIt.registerFactory(() => HomeViewModel(getIt()));
@@ -71,4 +85,5 @@ void setupServiceLocator() {
   getIt.registerFactory(() => VisitListViewModel(getIt()));
   getIt.registerFactory(() => DashboardViewModel(getIt(), getIt()));
   getIt.registerFactory(() => DueListViewModel(getIt()));
+  getIt.registerFactory(() => SyncViewModel(getIt(), getIt()));
 }

@@ -1,0 +1,12 @@
+abstract class ISyncRepository {
+  /// Pushes all dirty records to Firestore.
+  /// Returns count of synced items (just for stats).
+  Future<int> push();
+
+  /// Pulls all updated record from Firestore for this device.
+  /// Updates local SQLite.
+  Future<void> pull();
+
+  /// Gets the last sync timestamp.
+  Future<int> getLastSyncTimestamp();
+}

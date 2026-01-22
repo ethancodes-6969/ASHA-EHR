@@ -5,20 +5,41 @@ import 'package:asha_ehr/presentation/dashboard/dashboard_view_model.dart';
 import 'package:asha_ehr/presentation/home/home_screen.dart';
 import 'package:asha_ehr/presentation/due_list/due_list_screen.dart';
 
+import 'package:asha_ehr/presentation/sync/sync_view_model.dart';
+import 'package:asha_ehr/presentation/sync/sync_indicator.dart';
+import 'package:asha_ehr/presentation/settings/settings_screen.dart';
+
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => getIt<DashboardViewModel>()..initialLoad(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => getIt<DashboardViewModel>()..initialLoad()),
+        ChangeNotifierProvider(create: (_) => getIt<SyncViewModel>()),
+      ],
       child: const _DashboardContent(),
     );
   }
 }
 
-class _DashboardContent extends StatelessWidget {
+class _DashboardContent extends StatefulWidget {
   const _DashboardContent();
+
+  @override
+  State<_DashboardContent> createState() => _DashboardContentState();
+}
+
+class _DashboardContentState extends State<_DashboardContent> {
+  @override
+  void initState() {
+    super.initState();
+    // Trigger Sync on Startup
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SyncViewModel>().syncNow();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +48,18 @@ class _DashboardContent extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('ASHA Dashboard'),
+        actions: [
+          const SyncIndicator(),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context, 
+                MaterialPageRoute(builder: (context) => const SettingsScreen())
+              );
+            },
+          )
+        ],
       ),
       body: viewModel.isLoading
           ? const Center(child: CircularProgressIndicator())
