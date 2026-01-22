@@ -30,9 +30,10 @@ class _MemberContent extends StatelessWidget {
 
   const _MemberContent({required this.householdId, required this.householdName});
   
-  String _formatDate(int millis) {
+  String _formatDate(int? millis) {
+     if (millis == null) return "Age: N/A";
      final dt = DateTime.fromMillisecondsSinceEpoch(millis);
-     return "${dt.day}/${dt.month}/${dt.year}";
+     return "DOB: ${dt.day}/${dt.month}/${dt.year}";
   }
 
   @override
@@ -101,7 +102,7 @@ class _MemberContent extends StatelessWidget {
                               child: Text(member.gender),
                             ),
                             title: Text(member.name),
-                            subtitle: Text("DOB: ${_formatDate(member.dateOfBirth)}"),
+                            subtitle: Text(_formatDate(member.dateOfBirth)),
                             onTap: () {
                               Navigator.push(
                                 context,

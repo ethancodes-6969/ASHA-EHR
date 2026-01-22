@@ -5,8 +5,11 @@ class Member extends Equatable {
   final String householdId;
   final String name;
   final String gender; // 'M', 'F', 'O'
-  final int dateOfBirth; // Epoch millis
+  final int? dateOfBirth; // Nullable (Epoch millis)
   final String? idProofNumber;
+  final bool? isPregnant;
+  final int? lmpDate;
+  final int? deliveryDate;
   final int createdAt;
   final int updatedAt;
 
@@ -15,8 +18,11 @@ class Member extends Equatable {
     required this.householdId,
     required this.name,
     required this.gender,
-    required this.dateOfBirth,
+    this.dateOfBirth,
     this.idProofNumber,
+    this.isPregnant,
+    this.lmpDate,
+    this.deliveryDate,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -29,6 +35,9 @@ class Member extends Equatable {
     gender, 
     dateOfBirth, 
     idProofNumber, 
+    isPregnant,
+    lmpDate,
+    deliveryDate,
     createdAt, 
     updatedAt
   ];

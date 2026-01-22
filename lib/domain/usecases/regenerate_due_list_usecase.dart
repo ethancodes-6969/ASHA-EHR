@@ -119,7 +119,8 @@ class RegenerateDueListUseCase {
   }
 
   bool _isChild(Member member, DateTime now) {
-    final dob = DateTime.fromMillisecondsSinceEpoch(member.dateOfBirth);
+    if (member.dateOfBirth == null) return false;
+    final dob = DateTime.fromMillisecondsSinceEpoch(member.dateOfBirth!);
     final ageInDays = now.difference(dob).inDays;
     return ageInDays < (5 * 365); 
   }

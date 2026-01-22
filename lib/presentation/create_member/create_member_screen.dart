@@ -16,6 +16,8 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
   final _nameController = TextEditingController();
   String _gender = 'M';
   DateTime? _dob;
+  bool _isPregnant = false;
+  DateTime? _lmpDate;
   
   bool _isSaving = false;
 
@@ -25,7 +27,7 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
     super.dispose();
   }
   
-  Future<void> _pickDate() async {
+  Future<void> _pickDate({required bool isLmp}) async {
     final picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -34,29 +36,42 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
     );
     if (picked != null) {
       setState(() {
-        _dob = picked;
+        if (isLmp) {
+          _lmpDate = picked;
+        } else {
+          _dob = picked;
+        }
       });
     }
   }
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_dob == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please select Date of Birth")),
-      );
-      return;
-    }
+    // DOB is now optional, so no null check needed.
 
     setState(() => _isSaving = true);
 
     try {
       final createUseCase = getIt<CreateMemberUseCase>();
+      
+      // Cleanup: If not female, cannot be pregnant
+      final effectiveIsPregnant = _gender == 'F' ? _isPregnant : null; // or false? Domain says bool?, DB handles null. If Male, null is safer or false. 
+      // Actually member entity has isPregnant as bool?. 
+      // Logic: If gender != F, isPregnant should probably be null or false.
+      // Let's settle on false or null. Database default is NULL. 
+      // If I send null, it means "unknown" or "N/A".
+      
+      final effectiveLmp = (effectiveIsPregnant == true) ? _lmpDate?.millisecondsSinceEpoch : null;
+
       await createUseCase(
         householdId: widget.householdId,
         name: _nameController.text,
         gender: _gender,
-        dateOfBirth: _dob!.millisecondsSinceEpoch,
+        dateOfBirth: _dob?.millisecondsSinceEpoch,
+        isPregnant: effectiveIsPregnant,
+        lmpDate: effectiveLmp,
+        // Calculate EDD? limit to scope: "optional input for these fields". 
+        // I won't calculate EDD here to keep it simple unless needed.
       );
       if (mounted) {
         Navigator.pop(context, true);
@@ -105,12 +120,34 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(_dob == null 
-                  ? "Select Date of Birth *" 
+                  ? "Date of Birth (Optional)" 
                   : "DOB: ${_dob!.day}/${_dob!.month}/${_dob!.year}"
                 ),
                 trailing: const Icon(Icons.calendar_today),
-                onTap: _pickDate,
+                onTap: () => _pickDate(isLmp: false),
               ),
+              if (_gender == 'F') ...[
+                const SizedBox(height: 16),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text("Is Pregnant?"),
+                  value: _isPregnant,
+                  onChanged: (val) => setState(() {
+                     _isPregnant = val;
+                     if (!val) _lmpDate = null;
+                  }),
+                ),
+                if (_isPregnant)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(_lmpDate == null 
+                      ? "Select LMP Date *" 
+                      : "LMP: ${_lmpDate!.day}/${_lmpDate!.month}/${_lmpDate!.year}"
+                    ),
+                    trailing: const Icon(Icons.calendar_today, color: Colors.pink),
+                    onTap: () => _pickDate(isLmp: true),
+                  ),
+              ],
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,

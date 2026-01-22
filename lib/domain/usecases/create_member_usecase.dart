@@ -14,8 +14,11 @@ class CreateMemberUseCase {
     required String householdId,
     required String name,
     required String gender,
-    required int dateOfBirth,
+    int? dateOfBirth,
     String? idProofNumber,
+    bool? isPregnant,
+    int? lmpDate,
+    int? deliveryDate,
   }) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final id = const Uuid().v4();
@@ -27,6 +30,9 @@ class CreateMemberUseCase {
       gender: gender,
       dateOfBirth: dateOfBirth,
       idProofNumber: idProofNumber,
+      isPregnant: isPregnant,
+      lmpDate: lmpDate,
+      deliveryDate: deliveryDate,
       createdAt: now,
       updatedAt: now,
     );

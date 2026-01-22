@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:asha_ehr/core/di/service_locator.dart';
-import 'package:asha_ehr/domain/entities/visit.dart';
+
 import 'package:asha_ehr/domain/enums/visit_type.dart';
 import 'package:asha_ehr/domain/usecases/create_visit_usecase.dart';
 
