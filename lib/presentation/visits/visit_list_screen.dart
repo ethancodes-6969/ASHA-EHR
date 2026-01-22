@@ -4,21 +4,25 @@ import 'package:asha_ehr/core/di/service_locator.dart';
 import 'package:asha_ehr/presentation/visits/visit_list_view_model.dart';
 import 'package:asha_ehr/presentation/create_visit/create_visit_screen.dart';
 
+import 'package:asha_ehr/domain/enums/visit_type.dart';
+
 class VisitListScreen extends StatelessWidget {
   final String memberId;
   final String memberName;
+  final VisitType? suggestedVisitType;
 
   const VisitListScreen({
     super.key,
     required this.memberId,
     required this.memberName,
+    this.suggestedVisitType,
   });
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => getIt<VisitListViewModel>()..loadVisits(memberId),
-      child: _VisitContent(memberId: memberId, memberName: memberName),
+      child: _VisitContent(memberId: memberId, memberName: memberName, suggestedVisitType: suggestedVisitType),
     );
   }
 }
@@ -26,8 +30,9 @@ class VisitListScreen extends StatelessWidget {
 class _VisitContent extends StatelessWidget {
   final String memberId;
   final String memberName;
+  final VisitType? suggestedVisitType;
 
-  const _VisitContent({required this.memberId, required this.memberName});
+  const _VisitContent({required this.memberId, required this.memberName, this.suggestedVisitType});
 
   String _formatDate(int millis) {
     final dt = DateTime.fromMillisecondsSinceEpoch(millis);
@@ -84,7 +89,11 @@ class _VisitContent extends StatelessWidget {
           final result = await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => CreateVisitScreen(memberId: memberId, memberName: memberName),
+              builder: (context) => CreateVisitScreen(
+                  memberId: memberId, 
+                  memberName: memberName,
+                  initialVisitType: suggestedVisitType,
+              ),
             ),
           );
           if (result == true) {

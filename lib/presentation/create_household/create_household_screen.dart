@@ -78,7 +78,7 @@ class _CreateHouseholdScreenState extends State<CreateHouseholdScreen> {
               const SizedBox(height: AppSpacing.s32),
               SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: 56,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,

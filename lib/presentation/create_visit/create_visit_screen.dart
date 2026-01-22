@@ -11,11 +11,13 @@ import 'package:asha_ehr/presentation/theme/app_text_styles.dart';
 class CreateVisitScreen extends StatefulWidget {
   final String memberId;
   final String memberName;
+  final VisitType? initialVisitType;
 
   const CreateVisitScreen({
     super.key,
     required this.memberId,
     required this.memberName,
+    this.initialVisitType,
   });
 
   @override
@@ -28,8 +30,14 @@ class _CreateVisitScreenState extends State<CreateVisitScreen> {
   final _tagsController = TextEditingController();
 
   DateTime _visitDate = DateTime.now();
-  VisitType _category = VisitType.ROUTINE;
+  late VisitType _category;
   bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _category = widget.initialVisitType ?? VisitType.ROUTINE;
+  }
 
   @override
   void dispose() {
@@ -153,7 +161,7 @@ class _CreateVisitScreenState extends State<CreateVisitScreen> {
               // Save Button
               SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: 56,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,

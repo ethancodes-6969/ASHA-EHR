@@ -8,6 +8,9 @@ import 'package:asha_ehr/presentation/theme/app_spacing.dart';
 import 'package:asha_ehr/presentation/theme/app_text_styles.dart';
 import 'package:asha_ehr/presentation/components/app_card.dart';
 
+import 'package:asha_ehr/domain/enums/visit_type.dart';
+import 'package:asha_ehr/domain/entities/due_item.dart';
+
 class DueListScreen extends StatelessWidget {
   const DueListScreen({super.key});
 
@@ -45,6 +48,7 @@ class _DueListContent extends StatelessWidget {
                              MaterialPageRoute(builder: (context) => VisitListScreen(
                                memberId: item.memberId,
                                memberName: item.memberName,
+                               suggestedVisitType: _getVisitTypeFromItem(item),
                              ))
                            );
                       },
@@ -89,6 +93,15 @@ class _DueListContent extends StatelessWidget {
                   },
                 ),
     );
+  }
+
+  VisitType _getVisitTypeFromItem(DueItem item) {
+    final tag = item.programTag.toUpperCase();
+    if (tag.startsWith('ANC')) return VisitType.ANC;
+    if (tag.startsWith('PNC')) return VisitType.PNC;
+    if (tag.startsWith('HBNC')) return VisitType.HBNC;
+    if (tag.startsWith('HBYC')) return VisitType.HBYC;
+    return VisitType.ROUTINE;
   }
 
   Widget _buildBadge(String category) {
