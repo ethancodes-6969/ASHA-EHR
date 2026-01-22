@@ -12,6 +12,7 @@ class Member extends Equatable {
   final int? deliveryDate;
   final int createdAt;
   final int updatedAt;
+  final bool isArchived;
 
   const Member({
     required this.id,
@@ -25,7 +26,38 @@ class Member extends Equatable {
     this.deliveryDate,
     required this.createdAt,
     required this.updatedAt,
+    this.isArchived = false,
   });
+
+  Member copyWith({
+    String? id,
+    String? householdId,
+    String? name,
+    String? gender,
+    int? dateOfBirth,
+    String? idProofNumber,
+    bool? isPregnant,
+    int? lmpDate,
+    int? deliveryDate,
+    int? createdAt,
+    int? updatedAt,
+    bool? isArchived,
+  }) {
+    return Member(
+      id: id ?? this.id,
+      householdId: householdId ?? this.householdId,
+      name: name ?? this.name,
+      gender: gender ?? this.gender,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      idProofNumber: idProofNumber ?? this.idProofNumber,
+      isPregnant: isPregnant ?? this.isPregnant,
+      lmpDate: lmpDate ?? this.lmpDate,
+      deliveryDate: deliveryDate ?? this.deliveryDate,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isArchived: isArchived ?? this.isArchived,
+    );
+  }
 
   @override
   List<Object?> get props => [
@@ -39,6 +71,7 @@ class Member extends Equatable {
     lmpDate,
     deliveryDate,
     createdAt, 
-    updatedAt
+    updatedAt,
+    isArchived
   ];
 }

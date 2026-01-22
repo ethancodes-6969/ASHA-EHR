@@ -12,7 +12,10 @@ class MemberRepositoryImpl implements IMemberRepository {
   @override
   Future<List<Member>> getAllMembers() async {
     final db = await dbHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query(MemberDbModel.tableName);
+    final List<Map<String, dynamic>> maps = await db.query(
+      MemberDbModel.tableName,
+      where: '${MemberDbModel.colIsArchived} = 0',
+    );
     return maps.map((map) => MemberDbModel.fromMap(map)).toList();
   }
 
@@ -21,7 +24,7 @@ class MemberRepositoryImpl implements IMemberRepository {
     final db = await dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.query(
       MemberDbModel.tableName,
-      where: '${MemberDbModel.colHouseholdId} = ?',
+      where: '${MemberDbModel.colHouseholdId} = ? AND ${MemberDbModel.colIsArchived} = 0',
       whereArgs: [householdId],
       orderBy: '${MemberDbModel.colUpdatedAt} DESC',
     );
@@ -36,6 +39,33 @@ class MemberRepositoryImpl implements IMemberRepository {
       MemberDbModel.tableName,
       MemberDbModel.toMap(member),
       conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  @override
+  Future<void> updateMember(Member member) async {
+    final db = await dbHelper.database;
+    await db.update(
+      MemberDbModel.tableName,
+      MemberDbModel.toMap(member),
+      where: '${MemberDbModel.colId} = ?',
+      whereArgs: [member.id],
+    );
+  }
+
+  @override
+  Future<void> archiveMember(String id) async {
+    final db = await dbHelper.database;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await db.update(
+      MemberDbModel.tableName,
+      {
+        MemberDbModel.colIsArchived: 1,
+        MemberDbModel.colUpdatedAt: now,
+        MemberDbModel.colIsDirty: 1,
+      },
+      where: '${MemberDbModel.colId} = ?',
+      whereArgs: [id],
     );
   }
 }

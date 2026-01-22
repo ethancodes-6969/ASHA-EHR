@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:asha_ehr/core/di/service_locator.dart';
+import 'package:asha_ehr/domain/entities/member.dart';
 import 'package:asha_ehr/domain/usecases/create_member_usecase.dart';
+import 'package:asha_ehr/domain/usecases/update_member_usecase.dart';
 import 'package:asha_ehr/presentation/theme/app_colors.dart';
 import 'package:asha_ehr/presentation/theme/app_spacing.dart';
 import 'package:asha_ehr/presentation/components/section_header.dart';
@@ -8,8 +10,9 @@ import 'package:asha_ehr/presentation/theme/app_text_styles.dart';
 
 class CreateMemberScreen extends StatefulWidget {
   final String householdId;
+  final Member? member;
 
-  const CreateMemberScreen({super.key, required this.householdId});
+  const CreateMemberScreen({super.key, required this.householdId, this.member});
 
   @override
   State<CreateMemberScreen> createState() => _CreateMemberScreenState();
@@ -25,6 +28,25 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
   DateTime? _deliveryDate;
   
   bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.member != null) {
+      _nameController.text = widget.member!.name;
+      _gender = widget.member!.gender;
+      if (widget.member!.dateOfBirth != null) {
+        _dob = DateTime.fromMillisecondsSinceEpoch(widget.member!.dateOfBirth!);
+      }
+      _isPregnant = widget.member!.isPregnant ?? false;
+      if (widget.member!.lmpDate != null) {
+        _lmpDate = DateTime.fromMillisecondsSinceEpoch(widget.member!.lmpDate!);
+      }
+      if (widget.member!.deliveryDate != null) {
+        _deliveryDate = DateTime.fromMillisecondsSinceEpoch(widget.member!.deliveryDate!);
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -59,28 +81,40 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-    // DOB is now optional, so no null check needed.
 
     setState(() => _isSaving = true);
 
     try {
-      final createUseCase = getIt<CreateMemberUseCase>();
-      
-      // Cleanup: If not female, cannot be pregnant
       final effectiveIsPregnant = _gender == 'F' ? _isPregnant : null; 
-      
       final effectiveLmp = (effectiveIsPregnant == true) ? _lmpDate?.millisecondsSinceEpoch : null;
       final effectiveDelivery = (_gender == 'F' && effectiveIsPregnant != true) ? _deliveryDate?.millisecondsSinceEpoch : null;
 
-      await createUseCase(
-        householdId: widget.householdId,
-        name: _nameController.text,
-        gender: _gender,
-        dateOfBirth: _dob?.millisecondsSinceEpoch,
-        isPregnant: effectiveIsPregnant,
-        lmpDate: effectiveLmp,
-        deliveryDate: effectiveDelivery,
-      );
+      if (widget.member != null) {
+        // Update
+        final updateUseCase = getIt<UpdateMemberUseCase>();
+        await updateUseCase(
+          member: widget.member!,
+          name: _nameController.text,
+          gender: _gender,
+          dateOfBirth: _dob?.millisecondsSinceEpoch,
+          isPregnant: effectiveIsPregnant,
+          lmpDate: effectiveLmp,
+          deliveryDate: effectiveDelivery,
+        );
+      } else {
+        // Create
+        final createUseCase = getIt<CreateMemberUseCase>();
+        await createUseCase(
+          householdId: widget.householdId,
+          name: _nameController.text,
+          gender: _gender,
+          dateOfBirth: _dob?.millisecondsSinceEpoch,
+          isPregnant: effectiveIsPregnant,
+          lmpDate: effectiveLmp,
+          deliveryDate: effectiveDelivery,
+        );
+      }
+
       if (mounted) {
         Navigator.pop(context, true);
       }
@@ -99,8 +133,9 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isEdit = widget.member != null;
     return Scaffold(
-      appBar: AppBar(title: const Text("Add Member")),
+      appBar: AppBar(title: Text(isEdit ? "Edit Member" : "Add Member")),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.s16),
         child: Form(
@@ -158,7 +193,7 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
                       ? "Select LMP Date *" 
                       : "LMP: ${_lmpDate!.day}/${_lmpDate!.month}/${_lmpDate!.year}"
                     ),
-                    trailing: const Icon(Icons.calendar_today, color: Colors.pink), // Hardcoded pink allowed for logic differentiation or use AppColors.primary? Pink is standard for Maternal.
+                    trailing: const Icon(Icons.calendar_today, color: Colors.pink), 
                     onTap: () => _pickDate(type: 'lmp'),
                   ),
                 if (!_isPregnant)
@@ -189,7 +224,7 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
                           height: 24, width: 24, 
                           child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
                         )
-                      : const Text("Save Member", style: AppTextStyles.button),
+                      : Text(isEdit ? "Save Changes" : "Save Member", style: AppTextStyles.button),
                 ),
               )
             ],

@@ -60,6 +60,40 @@ class _HomeContent extends StatelessWidget {
                                 style: const TextStyle(fontWeight: FontWeight.bold),
                               ),
                               subtitle: Text(household.locationDescription),
+                              trailing: PopupMenuButton<String>(
+                                onSelected: (value) async {
+                                  if (value == 'edit') {
+                                      final result = await Navigator.push(context, MaterialPageRoute(
+                                        builder: (_) => CreateHouseholdScreen(household: household),
+                                      ));
+                                      if (result == true && context.mounted) {
+                                        context.read<HomeViewModel>().loadHouseholds();
+                                      }
+                                  } else if (value == 'archive') {
+                                      final confirm = await showDialog<bool>(
+                                        context: context,
+                                        builder: (ctx) => AlertDialog(
+                                          title: const Text("Archive Household?"),
+                                          content: const Text("This will hide the household and its members. It can be restored by admin only."),
+                                          actions: [
+                                            TextButton(child: const Text("Cancel"), onPressed: () => Navigator.pop(ctx, false)),
+                                            TextButton(
+                                                child: const Text("Archive", style: TextStyle(color: Colors.red)),
+                                                onPressed: () => Navigator.pop(ctx, true)
+                                            ),
+                                          ],
+                                        )
+                                      );
+                                      if (confirm == true && context.mounted) {
+                                        context.read<HomeViewModel>().archiveHousehold(household.id);
+                                      }
+                                  }
+                                },
+                                itemBuilder: (context) => [
+                                  const PopupMenuItem(value: 'edit', child: Text("Edit")),
+                                  const PopupMenuItem(value: 'archive', child: Text("Archive", style: TextStyle(color: Colors.red))),
+                                ],
+                              ),
                               onTap: () {
                                 Navigator.push(
                                   context,

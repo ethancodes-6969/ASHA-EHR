@@ -16,6 +16,7 @@ class MemberDbModel {
   static const String colIsPregnant = 'is_pregnant';
   static const String colLmpDate = 'lmp_date';
   static const String colDeliveryDate = 'delivery_date';
+  static const String colIsArchived = 'is_archived';
 
   static Map<String, dynamic> toMap(Member member) {
     return {
@@ -33,6 +34,7 @@ class MemberDbModel {
       colCreatedAt: member.createdAt,
       colUpdatedAt: member.updatedAt,
       colIsDirty: 1, 
+      colIsArchived: member.isArchived ? 1 : 0,
     };
   }
 
@@ -53,6 +55,7 @@ class MemberDbModel {
       deliveryDate: map[colDeliveryDate] as int?,
       createdAt: map[colCreatedAt] as int,
       updatedAt: map[colUpdatedAt] as int,
+      isArchived: (map[colIsArchived] as int? ?? 0) == 1,
     );
   }
 }

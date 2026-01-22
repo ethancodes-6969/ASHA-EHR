@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
   static const _databaseName = "asha_ehr.db";
-  static const _databaseVersion = 8; // Bumped version
+  static const _databaseVersion = 9; // Bumped version
 
   Database? _database;
 
@@ -96,6 +96,10 @@ class DatabaseHelper {
     }
     if (oldVersion < 8) {
       await _addDueItemReason(db);
+    }
+    if (oldVersion < 9) {
+      await db.execute('ALTER TABLE households ADD COLUMN is_archived INTEGER DEFAULT 0');
+      await db.execute('ALTER TABLE members ADD COLUMN is_archived INTEGER DEFAULT 0');
     }
   }
 

@@ -28,6 +28,11 @@ import 'package:asha_ehr/data/repositories/sync_repository_impl.dart';
 import 'package:asha_ehr/domain/repositories/i_sync_repository.dart';
 import 'package:asha_ehr/presentation/sync/sync_view_model.dart';
 
+import 'package:asha_ehr/domain/usecases/update_household_usecase.dart';
+import 'package:asha_ehr/domain/usecases/archive_household_usecase.dart';
+import 'package:asha_ehr/domain/usecases/update_member_usecase.dart';
+import 'package:asha_ehr/domain/usecases/archive_member_usecase.dart';
+
 final getIt = GetIt.instance;
 
 void setupServiceLocator() {
@@ -44,9 +49,13 @@ void setupServiceLocator() {
   // UseCases
   getIt.registerLazySingleton(() => CreateHouseholdUseCase(getIt()));
   getIt.registerLazySingleton(() => GetAllHouseholdsUseCase(getIt()));
+  getIt.registerLazySingleton(() => UpdateHouseholdUseCase(getIt()));
+  getIt.registerLazySingleton(() => ArchiveHouseholdUseCase(getIt()));
 
   getIt.registerLazySingleton(() => CreateMemberUseCase(getIt(), getIt()));
   getIt.registerLazySingleton(() => GetMembersByHouseholdUseCase(getIt()));
+  getIt.registerLazySingleton(() => UpdateMemberUseCase(getIt()));
+  getIt.registerLazySingleton(() => ArchiveMemberUseCase(getIt()));
 
   getIt.registerLazySingleton(() => CreateVisitUseCase(getIt(), getIt()));
   getIt.registerLazySingleton(() => GetVisitsByMemberUseCase(getIt()));
@@ -80,8 +89,8 @@ void setupServiceLocator() {
   );
 
   // ViewModels
-  getIt.registerFactory(() => HomeViewModel(getIt()));
-  getIt.registerFactory(() => MemberListViewModel(getIt(), getIt(), getIt()));
+  getIt.registerFactory(() => HomeViewModel(getIt(), getIt()));
+  getIt.registerFactory(() => MemberListViewModel(getIt(), getIt(), getIt(), getIt()));
   getIt.registerFactory(() => VisitListViewModel(getIt()));
   getIt.registerFactory(() => DashboardViewModel(getIt(), getIt()));
   getIt.registerFactory(() => DueListViewModel(getIt()));

@@ -103,6 +103,40 @@ class _MemberContent extends StatelessWidget {
                             ),
                             title: Text(member.name),
                             subtitle: Text(_formatDate(member.dateOfBirth)),
+                            trailing: PopupMenuButton<String>(
+                                onSelected: (value) async {
+                                  if (value == 'edit') {
+                                     final result = await Navigator.push(context, MaterialPageRoute(
+                                        builder: (_) => CreateMemberScreen(householdId: householdId, member: member),
+                                     ));
+                                     if (result == true && context.mounted) {
+                                        context.read<MemberListViewModel>().loadMembers(householdId);
+                                     }
+                                  } else if (value == 'archive') {
+                                     final confirm = await showDialog<bool>(
+                                        context: context,
+                                        builder: (ctx) => AlertDialog(
+                                            title: const Text("Archive Member?"),
+                                            content: const Text("This will hide the member and remove them from due lists."),
+                                            actions: [
+                                              TextButton(child: const Text("Cancel"), onPressed: () => Navigator.pop(ctx, false)),
+                                              TextButton(
+                                                  child: const Text("Archive", style: TextStyle(color: Colors.red)),
+                                                  onPressed: () => Navigator.pop(ctx, true)
+                                              ),
+                                            ],
+                                        )
+                                     );
+                                     if (confirm == true && context.mounted) {
+                                        context.read<MemberListViewModel>().archiveMember(member.id, householdId);
+                                     }
+                                  }
+                                },
+                                itemBuilder: (context) => [
+                                  const PopupMenuItem(value: 'edit', child: Text("Edit")),
+                                  const PopupMenuItem(value: 'archive', child: Text("Archive", style: TextStyle(color: Colors.red))),
+                                ],
+                            ),
                             onTap: () {
                               Navigator.push(
                                 context,

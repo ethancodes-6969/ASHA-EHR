@@ -1,11 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:asha_ehr/domain/entities/household.dart';
 import 'package:asha_ehr/domain/usecases/get_all_households_usecase.dart';
+import 'package:asha_ehr/domain/usecases/archive_household_usecase.dart';
 
 class HomeViewModel extends ChangeNotifier {
   final GetAllHouseholdsUseCase _getAllHouseholdsUseCase;
+  final ArchiveHouseholdUseCase _archiveHouseholdUseCase;
 
-  HomeViewModel(this._getAllHouseholdsUseCase);
+  HomeViewModel(this._getAllHouseholdsUseCase, this._archiveHouseholdUseCase);
 
   List<Household> _households = [];
   
@@ -37,6 +39,15 @@ class HomeViewModel extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> archiveHousehold(String id) async {
+    try {
+      await _archiveHouseholdUseCase(id);
+      await loadHouseholds();
+    } catch (e) {
+      debugPrint("Error archiving household: $e");
     }
   }
 }

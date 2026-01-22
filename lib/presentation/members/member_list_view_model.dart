@@ -3,16 +3,19 @@ import 'package:asha_ehr/domain/entities/member.dart';
 import 'package:asha_ehr/domain/usecases/get_members_by_household_usecase.dart';
 import 'package:asha_ehr/domain/usecases/get_visits_by_member_usecase.dart';
 import 'package:asha_ehr/domain/usecases/get_all_due_items_usecase.dart';
+import 'package:asha_ehr/domain/usecases/archive_member_usecase.dart';
 
 class MemberListViewModel extends ChangeNotifier {
   final GetMembersByHouseholdUseCase _getMembersUseCase;
   final GetVisitsByMemberUseCase _getVisitsUseCase;
   final GetAllDueItemsUseCase _getAllDueItemsUseCase;
+  final ArchiveMemberUseCase _archiveMemberUseCase;
 
   MemberListViewModel(
     this._getMembersUseCase,
     this._getVisitsUseCase,
     this._getAllDueItemsUseCase,
+    this._archiveMemberUseCase,
   );
 
   List<Member> _members = [];
@@ -77,6 +80,15 @@ class MemberListViewModel extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> archiveMember(String id, String householdId) async {
+    try {
+      await _archiveMemberUseCase(id);
+      await loadMembers(householdId);
+    } catch (e) {
+      debugPrint("Error archiving member: $e");
     }
   }
 }

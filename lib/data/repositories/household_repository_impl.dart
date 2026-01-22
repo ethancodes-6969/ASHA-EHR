@@ -10,10 +10,12 @@ class HouseholdRepositoryImpl implements IHouseholdRepository {
   HouseholdRepositoryImpl(this.dbHelper);
 
   @override
+  @override
   Future<List<Household>> getAllHouseholds() async {
     final db = await dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.query(
       HouseholdDbModel.tableName,
+      where: '${HouseholdDbModel.colIsArchived} = 0',
       orderBy: '${HouseholdDbModel.colUpdatedAt} DESC',
     );
 
@@ -28,6 +30,33 @@ class HouseholdRepositoryImpl implements IHouseholdRepository {
       HouseholdDbModel.tableName,
       HouseholdDbModel.toMap(household),
       conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  @override
+  Future<void> updateHousehold(Household household) async {
+    final db = await dbHelper.database;
+    await db.update(
+      HouseholdDbModel.tableName,
+      HouseholdDbModel.toMap(household),
+      where: '${HouseholdDbModel.colId} = ?',
+      whereArgs: [household.id],
+    );
+  }
+
+  @override
+  Future<void> archiveHousehold(String id) async {
+    final db = await dbHelper.database;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await db.update(
+      HouseholdDbModel.tableName,
+      {
+        HouseholdDbModel.colIsArchived: 1,
+        HouseholdDbModel.colUpdatedAt: now,
+        HouseholdDbModel.colIsDirty: 1,
+      },
+      where: '${HouseholdDbModel.colId} = ?',
+      whereArgs: [id],
     );
   }
 }

@@ -4,4 +4,6 @@ abstract class IMemberRepository {
   Future<List<Member>> getMembersByHousehold(String householdId);
   Future<List<Member>> getAllMembers(); // Internal use only
   Future<void> saveMember(Member member);
+  Future<void> updateMember(Member member);
+  Future<void> archiveMember(String id);
 }
