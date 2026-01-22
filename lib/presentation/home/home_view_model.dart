@@ -8,10 +8,23 @@ class HomeViewModel extends ChangeNotifier {
   HomeViewModel(this._getAllHouseholdsUseCase);
 
   List<Household> _households = [];
-  List<Household> get households => _households;
+  
+  String _searchQuery = '';
+
+  List<Household> get households => _searchQuery.isEmpty 
+      ? _households 
+      : _households.where((h) => 
+          h.familyHeadName.toLowerCase().contains(_searchQuery.toLowerCase()) || 
+          h.locationDescription.toLowerCase().contains(_searchQuery.toLowerCase())
+        ).toList();
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
+
+  void setSearchQuery(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
 
   Future<void> loadHouseholds() async {
     _isLoading = true;

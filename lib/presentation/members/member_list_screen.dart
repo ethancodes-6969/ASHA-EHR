@@ -53,34 +53,72 @@ class _MemberContent extends StatelessWidget {
             ),
         ),
       ),
-      body: viewModel.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : viewModel.members.isEmpty
-              ? const Center(child: Text("No members added yet."))
-              : ListView.builder(
-                  itemCount: viewModel.members.length,
-                  itemBuilder: (context, index) {
-                    final member = viewModel.members[index];
-                    return ListTile(
-                      leading: CircleAvatar(
-                        child: Text(member.gender),
-                      ),
-                      title: Text(member.name),
-                      subtitle: Text("DOB: ${_formatDate(member.dateOfBirth)}"),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => VisitListScreen(
-                              memberId: member.id,
-                              memberName: member.name,
+      body: Column(
+        children: [
+          // 1. Summary & Search Card
+          Card(
+            margin: const EdgeInsets.all(16),
+            elevation: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                       _buildStatItem("Visits", viewModel.visitCount.toString(), Colors.blue),
+                       _buildStatItem("Due Tasks", viewModel.dueCount.toString(), Colors.deepOrange),
+                    ],
+                  ),
+                  const Divider(height: 24),
+                  TextField(
+                    decoration: const InputDecoration(
+                      hintText: "Search Members",
+                      prefixIcon: Icon(Icons.search),
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(vertical: 8),
+                    ),
+                    onChanged: (val) => context.read<MemberListViewModel>().setSearchQuery(val),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // 2. Member List
+          Expanded(
+            child: viewModel.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : viewModel.members.isEmpty
+                    ? const Center(child: Text("No members found."))
+                    : ListView.builder(
+                        itemCount: viewModel.members.length,
+                        itemBuilder: (context, index) {
+                          final member = viewModel.members[index];
+                          return ListTile(
+                            leading: CircleAvatar(
+                              child: Text(member.gender),
                             ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
+                            title: Text(member.name),
+                            subtitle: Text("DOB: ${_formatDate(member.dateOfBirth)}"),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => VisitListScreen(
+                                    memberId: member.id,
+                                    memberName: member.name,
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final result = await Navigator.push(
@@ -97,6 +135,15 @@ class _MemberContent extends StatelessWidget {
         },
         child: const Icon(Icons.person_add),
       ),
+    );
+  }
+  
+  Widget _buildStatItem(String label, String value, Color color) {
+    return Column(
+      children: [
+        Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color)),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+      ],
     );
   }
 }

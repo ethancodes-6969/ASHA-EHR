@@ -81,7 +81,7 @@ void setupServiceLocator() {
 
   // ViewModels
   getIt.registerFactory(() => HomeViewModel(getIt()));
-  getIt.registerFactory(() => MemberListViewModel(getIt()));
+  getIt.registerFactory(() => MemberListViewModel(getIt(), getIt(), getIt()));
   getIt.registerFactory(() => VisitListViewModel(getIt()));
   getIt.registerFactory(() => DashboardViewModel(getIt(), getIt()));
   getIt.registerFactory(() => DueListViewModel(getIt()));
