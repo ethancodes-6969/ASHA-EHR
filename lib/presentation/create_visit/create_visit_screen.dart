@@ -144,6 +144,7 @@ class _CreateVisitScreenState extends State<CreateVisitScreen> {
               // Save Button
               SizedBox(
                 width: double.infinity,
+                height: 48,
                 child: ElevatedButton(
                   onPressed: _isSaving ? null : _save,
                   child: _isSaving

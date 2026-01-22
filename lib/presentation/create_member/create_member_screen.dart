@@ -114,6 +114,7 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
+                height: 48,
                 child: ElevatedButton(
                   onPressed: _isSaving ? null : _save,
                   child: _isSaving

@@ -70,11 +70,15 @@ class _CreateHouseholdScreenState extends State<CreateHouseholdScreen> {
                 decoration: const InputDecoration(labelText: "Location / Landmark"),
               ),
               const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _isSaving ? null : _save,
-                child: _isSaving
-                    ? const CircularProgressIndicator()
-                    : const Text("Save Household"),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: _isSaving ? null : _save,
+                  child: _isSaving
+                      ? const CircularProgressIndicator()
+                      : const Text("Save Household"),
+                ),
               )
             ],
           ),
