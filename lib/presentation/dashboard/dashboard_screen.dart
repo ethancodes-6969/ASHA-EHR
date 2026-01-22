@@ -8,6 +8,12 @@ import 'package:asha_ehr/presentation/due_list/due_list_screen.dart';
 import 'package:asha_ehr/presentation/sync/sync_view_model.dart';
 import 'package:asha_ehr/presentation/sync/sync_indicator.dart';
 import 'package:asha_ehr/presentation/settings/settings_screen.dart';
+import 'package:asha_ehr/presentation/theme/app_colors.dart';
+import 'package:asha_ehr/presentation/theme/app_spacing.dart';
+import 'package:asha_ehr/presentation/components/stat_card.dart';
+import 'package:asha_ehr/presentation/components/section_header.dart';
+import 'package:asha_ehr/presentation/components/app_card.dart';
+import 'package:asha_ehr/presentation/theme/app_text_styles.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -66,76 +72,45 @@ class _DashboardContentState extends State<_DashboardContent> {
           : RefreshIndicator(
               onRefresh: viewModel.refresh,
               child: ListView(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(AppSpacing.s16),
                 children: [
-                  _buildStatCard(
-                    context, 
-                    "Visits Due Today", 
-                    viewModel.stats['total'] ?? 0,
-                    const Color(0xFFFFCDD2), // Red tint
-                    () {
+                  const SectionHeader(title: "Today's Overview"),
+                  const SizedBox(height: AppSpacing.s12),
+                  StatCard(
+                    label: "Visits Due Today",
+                    value: (viewModel.stats['total'] ?? 0).toString(),
+                    valueColor: AppColors.highRisk,
+                    icon: Icons.assignment_late,
+                    onTap: () {
                        Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const DueListScreen()),
                       ).then((_) => viewModel.refresh());
-                    }
+                    },
                   ),
-                  const SizedBox(height: 16),
-                  _buildNavCard(
-                    context,
-                    "Households Register",
-                    Icons.people_alt,
-                    () {
+                  const SizedBox(height: AppSpacing.s24),
+                  const SectionHeader(title: "Navigation"),
+                  const SizedBox(height: AppSpacing.s12),
+                  AppCard(
+                    onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const HomeScreen()),
                       ).then((_) => viewModel.refresh());
-                    }
+                    },
+                    child: Row(
+                      children: [
+                        const Icon(Icons.people_alt, size: 32, color: AppColors.primary),
+                        const SizedBox(width: AppSpacing.s16),
+                        const Text("Households Register", style: AppTextStyles.title),
+                        const Spacer(),
+                        const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.textSecondary),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-    );
-  }
-
-  Widget _buildStatCard(BuildContext context, String title, int count, Color color, VoidCallback onTap) {
-    return Card(
-      color: color,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            children: [
-              Text(
-                count.toString(),
-                style: Theme.of(context).textTheme.displayLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(title, style: Theme.of(context).textTheme.titleMedium),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavCard(BuildContext context, String title, IconData icon, VoidCallback onTap) {
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 32),
-              const SizedBox(width: 16),
-              Text(title, style: Theme.of(context).textTheme.titleLarge),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

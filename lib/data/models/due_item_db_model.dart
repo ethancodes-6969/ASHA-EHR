@@ -12,6 +12,8 @@ class DueItemDbModel {
   static const String colDueDate = 'due_date';
   static const String colGeneratedAt = 'generated_at';
 
+  static const String colReason = 'reason';
+
   static Map<String, dynamic> toMap(DueItem item) {
     return {
       colId: item.id,
@@ -22,6 +24,7 @@ class DueItemDbModel {
       colProgramTag: item.programTag,
       colDueDate: item.dueDate,
       colGeneratedAt: item.generatedAt,
+      colReason: item.reason,
     };
   }
 
@@ -35,6 +38,7 @@ class DueItemDbModel {
       programTag: map[colProgramTag] as String,
       dueDate: map[colDueDate] as int,
       generatedAt: map[colGeneratedAt] as int,
+      reason: map[colReason] as String? ?? '',
     );
   }
 }

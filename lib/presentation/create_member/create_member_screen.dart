@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:asha_ehr/core/di/service_locator.dart';
 import 'package:asha_ehr/domain/usecases/create_member_usecase.dart';
+import 'package:asha_ehr/presentation/theme/app_colors.dart';
+import 'package:asha_ehr/presentation/theme/app_spacing.dart';
+import 'package:asha_ehr/presentation/components/section_header.dart';
+import 'package:asha_ehr/presentation/theme/app_text_styles.dart';
 
 class CreateMemberScreen extends StatefulWidget {
   final String householdId;
@@ -18,6 +22,7 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
   DateTime? _dob;
   bool _isPregnant = false;
   DateTime? _lmpDate;
+  DateTime? _deliveryDate;
   
   bool _isSaving = false;
 
@@ -27,17 +32,24 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
     super.dispose();
   }
   
-  Future<void> _pickDate({required bool isLmp}) async {
+  Future<void> _pickDate({required String type}) async {
+    DateTime firstDate = DateTime(1900);
+    if (type == 'delivery') {
+      firstDate = DateTime.now().subtract(const Duration(days: 365));
+    }
+
     final picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
+      firstDate: firstDate,
       lastDate: DateTime.now(),
     );
     if (picked != null) {
       setState(() {
-        if (isLmp) {
+        if (type == 'lmp') {
           _lmpDate = picked;
+        } else if (type == 'delivery') {
+          _deliveryDate = picked;
         } else {
           _dob = picked;
         }
@@ -55,13 +67,10 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
       final createUseCase = getIt<CreateMemberUseCase>();
       
       // Cleanup: If not female, cannot be pregnant
-      final effectiveIsPregnant = _gender == 'F' ? _isPregnant : null; // or false? Domain says bool?, DB handles null. If Male, null is safer or false. 
-      // Actually member entity has isPregnant as bool?. 
-      // Logic: If gender != F, isPregnant should probably be null or false.
-      // Let's settle on false or null. Database default is NULL. 
-      // If I send null, it means "unknown" or "N/A".
+      final effectiveIsPregnant = _gender == 'F' ? _isPregnant : null; 
       
       final effectiveLmp = (effectiveIsPregnant == true) ? _lmpDate?.millisecondsSinceEpoch : null;
+      final effectiveDelivery = (_gender == 'F' && effectiveIsPregnant != true) ? _deliveryDate?.millisecondsSinceEpoch : null;
 
       await createUseCase(
         householdId: widget.householdId,
@@ -70,8 +79,7 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
         dateOfBirth: _dob?.millisecondsSinceEpoch,
         isPregnant: effectiveIsPregnant,
         lmpDate: effectiveLmp,
-        // Calculate EDD? limit to scope: "optional input for these fields". 
-        // I won't calculate EDD here to keep it simple unless needed.
+        deliveryDate: effectiveDelivery,
       );
       if (mounted) {
         Navigator.pop(context, true);
@@ -93,19 +101,21 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Add Member")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.s16),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SectionHeader(title: "Personal Details"),
+              const SizedBox(height: AppSpacing.s16),
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(labelText: "Full Name *"),
                 validator: (v) => v == null || v.isEmpty ? "Required" : null,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.s16),
               DropdownButtonFormField<String>(
                 value: _gender,
                 decoration: const InputDecoration(labelText: "Gender"),
@@ -116,7 +126,7 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
                 ],
                 onChanged: (val) => setState(() => _gender = val!),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.s16),
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(_dob == null 
@@ -124,17 +134,21 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
                   : "DOB: ${_dob!.day}/${_dob!.month}/${_dob!.year}"
                 ),
                 trailing: const Icon(Icons.calendar_today),
-                onTap: () => _pickDate(isLmp: false),
+                onTap: () => _pickDate(type: 'dob'),
               ),
               if (_gender == 'F') ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.s24),
+                const SectionHeader(title: "Clinical Information"),
+                const SizedBox(height: AppSpacing.s12),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text("Is Pregnant?"),
                   value: _isPregnant,
+                  activeColor: AppColors.primary,
                   onChanged: (val) => setState(() {
                      _isPregnant = val;
                      if (!val) _lmpDate = null;
+                     else _deliveryDate = null;
                   }),
                 ),
                 if (_isPregnant)
@@ -144,22 +158,38 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
                       ? "Select LMP Date *" 
                       : "LMP: ${_lmpDate!.day}/${_lmpDate!.month}/${_lmpDate!.year}"
                     ),
-                    trailing: const Icon(Icons.calendar_today, color: Colors.pink),
-                    onTap: () => _pickDate(isLmp: true),
+                    trailing: const Icon(Icons.calendar_today, color: Colors.pink), // Hardcoded pink allowed for logic differentiation or use AppColors.primary? Pink is standard for Maternal.
+                    onTap: () => _pickDate(type: 'lmp'),
+                  ),
+                if (!_isPregnant)
+                   ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(_deliveryDate == null 
+                      ? "Delivery Date (if recent)" 
+                      : "Delivered: ${_deliveryDate!.day}/${_deliveryDate!.month}/${_deliveryDate!.year}"
+                    ),
+                    subtitle: _deliveryDate == null ? const Text("For PNC tracking") : null,
+                    trailing: const Icon(Icons.child_friendly, color: AppColors.success),
+                    onTap: () => _pickDate(type: 'delivery'),
                   ),
               ],
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.s32),
               SizedBox(
                 width: double.infinity,
-                height: 48,
+                height: 52,
                 child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    disabledBackgroundColor: AppColors.textSecondary.withAlpha(31),
+                    foregroundColor: Colors.white,
+                  ),
                   onPressed: _isSaving ? null : _save,
                   child: _isSaving
                       ? const SizedBox(
-                          height: 20, width: 20, 
-                          child: CircularProgressIndicator(strokeWidth: 2)
+                          height: 24, width: 24, 
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
                         )
-                      : const Text("Save Member"),
+                      : const Text("Save Member", style: AppTextStyles.button),
                 ),
               )
             ],

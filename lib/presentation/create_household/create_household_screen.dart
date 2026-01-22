@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:asha_ehr/core/di/service_locator.dart';
 import 'package:asha_ehr/domain/usecases/create_household_usecase.dart';
+import 'package:asha_ehr/presentation/theme/app_colors.dart';
+import 'package:asha_ehr/presentation/theme/app_spacing.dart';
+import 'package:asha_ehr/presentation/components/section_header.dart';
+import 'package:asha_ehr/presentation/theme/app_text_styles.dart';
 
 class CreateHouseholdScreen extends StatefulWidget {
   const CreateHouseholdScreen({super.key});
@@ -53,31 +57,38 @@ class _CreateHouseholdScreenState extends State<CreateHouseholdScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Create Household")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.s16),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
+              const SectionHeader(title: "Household Details"),
+              const SizedBox(height: AppSpacing.s16),
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(labelText: "Family Head Name *"),
                 validator: (v) => v == null || v.isEmpty ? "Required" : null,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.s16),
               TextFormField(
                 controller: _locationController,
                 decoration: const InputDecoration(labelText: "Location / Landmark"),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.s32),
               SizedBox(
                 width: double.infinity,
-                height: 48,
+                height: 52,
                 child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    disabledBackgroundColor: AppColors.textSecondary.withAlpha(31),
+                    foregroundColor: Colors.white,
+                  ),
                   onPressed: _isSaving ? null : _save,
                   child: _isSaving
-                      ? const CircularProgressIndicator()
-                      : const Text("Save Household"),
+                      ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : const Text("Save Household", style: AppTextStyles.button),
                 ),
               )
             ],

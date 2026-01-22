@@ -9,6 +9,7 @@ class DueItem extends Equatable {
   final String programTag; // 'ROUTINE', 'ANC_1', etc.
   final int dueDate;
   final int generatedAt;
+  final String reason;
 
   const DueItem({
     required this.id,
@@ -19,6 +20,7 @@ class DueItem extends Equatable {
     required this.programTag,
     required this.dueDate,
     required this.generatedAt,
+    required this.reason,
   });
 
   @override
@@ -31,5 +33,6 @@ class DueItem extends Equatable {
         programTag,
         dueDate,
         generatedAt,
+        reason,
       ];
 }

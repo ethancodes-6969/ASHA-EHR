@@ -3,6 +3,10 @@ import 'package:asha_ehr/core/di/service_locator.dart';
 
 import 'package:asha_ehr/domain/enums/visit_type.dart';
 import 'package:asha_ehr/domain/usecases/create_visit_usecase.dart';
+import 'package:asha_ehr/presentation/theme/app_colors.dart';
+import 'package:asha_ehr/presentation/theme/app_spacing.dart';
+import 'package:asha_ehr/presentation/components/section_header.dart';
+import 'package:asha_ehr/presentation/theme/app_text_styles.dart';
 
 class CreateVisitScreen extends StatefulWidget {
   final String memberId;
@@ -91,12 +95,14 @@ class _CreateVisitScreenState extends State<CreateVisitScreen> {
     return Scaffold(
       appBar: AppBar(title: Text("New Visit: ${widget.memberName}")),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(AppSpacing.s16),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SectionHeader(title: "Visit Details"),
+              const SizedBox(height: AppSpacing.s16),
               // Date Picker
               ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -118,8 +124,10 @@ class _CreateVisitScreenState extends State<CreateVisitScreen> {
                 }).toList(),
                 onChanged: (val) => setState(() => _category = val!),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.s24),
 
+              const SectionHeader(title: "Findings"),
+              const SizedBox(height: AppSpacing.s16),
               // Notes
               TextFormField(
                 controller: _notesController,
@@ -130,7 +138,7 @@ class _CreateVisitScreenState extends State<CreateVisitScreen> {
                 ),
                 maxLines: 3,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.s16),
 
               // Tags
               TextFormField(
@@ -140,20 +148,25 @@ class _CreateVisitScreenState extends State<CreateVisitScreen> {
                   hintText: "e.g., HIGH_RISK, ANAEMIC",
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.s32),
 
               // Save Button
               SizedBox(
                 width: double.infinity,
-                height: 48,
+                height: 52,
                 child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    disabledBackgroundColor: AppColors.textSecondary.withAlpha(31),
+                    foregroundColor: Colors.white,
+                  ),
                   onPressed: _isSaving ? null : _save,
                   child: _isSaving
                       ? const SizedBox(
-                          height: 20, width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2)
+                          height: 24, width: 24,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
                         )
-                      : const Text("Record Visit"),
+                      : const Text("Record Visit", style: AppTextStyles.button),
                 ),
               )
             ],
