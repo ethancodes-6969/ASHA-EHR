@@ -10,6 +10,13 @@ class VisitRepositoryImpl implements IVisitRepository {
   VisitRepositoryImpl(this.dbHelper);
 
   @override
+  Future<List<Visit>> getAllVisits() async {
+    final db = await dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(VisitDbModel.tableName);
+    return maps.map((map) => VisitDbModel.fromMap(map)).toList();
+  }
+
+  @override
   Future<List<Visit>> getVisitsByMember(String memberId) async {
     final db = await dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.query(

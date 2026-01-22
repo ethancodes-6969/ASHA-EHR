@@ -10,6 +10,13 @@ class MemberRepositoryImpl implements IMemberRepository {
   MemberRepositoryImpl(this.dbHelper);
 
   @override
+  Future<List<Member>> getAllMembers() async {
+    final db = await dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(MemberDbModel.tableName);
+    return maps.map((map) => MemberDbModel.fromMap(map)).toList();
+  }
+
+  @override
   Future<List<Member>> getMembersByHousehold(String householdId) async {
     final db = await dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.query(

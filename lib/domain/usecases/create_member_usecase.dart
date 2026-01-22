@@ -32,6 +32,6 @@ class CreateMemberUseCase {
     );
 
     await repository.saveMember(member);
-    await regenerateDueListUseCase();
+    Future.microtask(() => regenerateDueListUseCase());
   }
 }

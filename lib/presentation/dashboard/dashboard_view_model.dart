@@ -20,7 +20,7 @@ class DashboardViewModel extends ChangeNotifier {
 
     try {
       // 1. Regenerate
-      await _regenerateUseCase();
+      await _regenerateUseCase.call();
       // 2. Refresh stats
       _stats = await _getStatsUseCase();
     } catch (e) {

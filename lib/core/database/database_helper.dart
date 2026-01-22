@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
   static const _databaseName = "asha_ehr.db";
-  static const _databaseVersion = 5; // Bumped version
+  static const _databaseVersion = 6; // Bumped version
 
   Database? _database;
 
@@ -63,6 +63,11 @@ class DatabaseHelper {
     if (version >= 5) {
       await _createAshaDeviceTable(db);
     }
+
+    // V6 (Indices)
+    if (version >= 6) {
+      await _createIndices(db);
+    }
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -77,6 +82,9 @@ class DatabaseHelper {
     }
     if (oldVersion < 5) {
       await _createAshaDeviceTable(db);
+    }
+    if (oldVersion < 6) {
+      await _createIndices(db);
     }
   }
 
@@ -143,5 +151,13 @@ class DatabaseHelper {
         created_at INTEGER NOT NULL
       )
     ''');
+  }
+
+  Future<void> _createIndices(Database db) async {
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_households_updated ON households(updated_at)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_members_household ON members(household_id)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_visits_member ON visits(member_id)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_visits_date ON visits(visit_date)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_due_items_date ON due_items(due_date)');
   }
 }

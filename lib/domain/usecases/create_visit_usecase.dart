@@ -32,7 +32,7 @@ class CreateVisitUseCase {
 
     await repository.saveVisit(visit);
     
-    // Trigger regeneration
-    await regenerateDueListUseCase();
+    // Trigger regeneration off-thread
+    Future.microtask(() => regenerateDueListUseCase());
   }
 }

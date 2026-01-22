@@ -1,4 +1,5 @@
 import 'package:asha_ehr/domain/entities/due_item.dart';
+import 'package:asha_ehr/domain/entities/household.dart';
 import 'package:asha_ehr/domain/entities/member.dart';
 import 'package:asha_ehr/domain/entities/visit.dart';
 import 'package:asha_ehr/domain/repositories/i_due_list_repository.dart';
@@ -24,68 +25,91 @@ class RegenerateDueListUseCase {
     final todayMillis = now.millisecondsSinceEpoch;
     final generatedAt = todayMillis;
 
-    // 1. Fetch EVERYTHING (MVP Style)
-    final households = await householdRepository.getAllHouseholds();
+    // 1. Fetch ALL Data (Batch Mode)
+    // Parallelize fetches for speed? Sure, why not.
+    final results = await Future.wait([
+      householdRepository.getAllHouseholds(),
+      memberRepository.getAllMembers(),
+      visitRepository.getAllVisits(),
+    ]);
+
+    final households = results[0] as List<Household>;
+    final members = results[1] as List<Member>;
+    final visits = results[2] as List<Visit>;
+
+    // 2. Index in Memory
+    final householdMap = {
+      for (final h in households) h.id: h
+    };
+
+    final visitsByMember = <String, List<Visit>>{};
+    for (final v in visits) {
+      if (!visitsByMember.containsKey(v.memberId)) {
+        visitsByMember[v.memberId] = [];
+      }
+      visitsByMember[v.memberId]!.add(v);
+    }
+
+    // Sort visits once per list? Or just sort when needed?
+    // Sorting small lists (max ~50 visits/member) is cheap.
+    for (final list in visitsByMember.values) {
+      list.sort((a, b) => b.visitDate.compareTo(a.visitDate));
+    }
+
     final List<DueItem> newDueItems = [];
 
-    for (final household in households) {
-      final members = await memberRepository.getMembersByHousehold(household.id);
-      
-      for (final member in members) {
-        final visits = await visitRepository.getVisitsByMember(member.id);
-        
-        // Sort visits desc
-        visits.sort((a, b) => b.visitDate.compareTo(a.visitDate));
-        final lastVisit = visits.isNotEmpty ? visits.first : null;
-        
-        // Rule 1: Child (< 5 years) and No Visit > 60 days
-        if (_isChild(member, now)) {
-          if (_daysSince(lastVisit?.visitDate, now) > 60) {
-             newDueItems.add(_createDueItem(
-               member, 
-               household.locationDescription,
-               "CHILD", 
-               "Growth Monitoring", 
-               now, 
-               generatedAt
-             ));
-             continue; // Prioritize Child rule, don't double add routine
-          }
-        }
+    // 3. Process Rules
+    for (final member in members) {
+      final household = householdMap[member.householdId];
+      final memberVisits = visitsByMember[member.id] ?? [];
+      final lastVisit = memberVisits.isNotEmpty ? memberVisits.first : null;
 
-        // Rule 2: Maternal (Has MATERNAL visit AND > 30 days since last)
-        // Note: We check if ANY past visit was MATERNAL to tag them as "Active Maternal" for MVP
-        final hasMaternalHistory = visits.any((v) => v.coreCategory == CoreVisitCategory.maternal);
-        if (hasMaternalHistory) {
-           final lastMaternalVisit = visits.firstWhere(
-             (v) => v.coreCategory == CoreVisitCategory.maternal, 
-             orElse: () => visits.first // Should be found if any() is true
-           );
-           
-           if (_daysSince(lastMaternalVisit.visitDate, now) > 30) {
-              newDueItems.add(_createDueItem(
-                 member,
-                 household.locationDescription,
-                 "MATERNAL", 
-                 "Maternal Follow-up", 
-                 now, 
-                 generatedAt
-              ));
-              continue;
-           }
-        }
-        
-        // Rule 3: Routine (No visit > 90 days)
-        if (_daysSince(lastVisit?.visitDate, now) > 90) {
+      // Rule 1: Child (< 5 years) and No Visit > 60 days
+      if (_isChild(member, now)) {
+        if (_daysSince(lastVisit?.visitDate, now) > 60) {
            newDueItems.add(_createDueItem(
              member, 
-             household.locationDescription,
-             "ROUTINE", 
-             "Routine Home Visit", 
+             household?.locationDescription,
+             "CHILD", 
+             "Growth Monitoring", 
              now, 
              generatedAt
            ));
+           continue; // Prioritize Child rule
         }
+      }
+
+      // Rule 2: Maternal (Has MATERNAL visit AND > 30 days since last)
+      final hasMaternalHistory = memberVisits.any((v) => v.coreCategory == CoreVisitCategory.maternal);
+      if (hasMaternalHistory) {
+         final lastMaternalVisit = memberVisits.firstWhere(
+           (v) => v.coreCategory == CoreVisitCategory.maternal, 
+           orElse: () => memberVisits.first 
+         );
+         
+         if (_daysSince(lastMaternalVisit.visitDate, now) > 30) {
+            newDueItems.add(_createDueItem(
+               member,
+               household?.locationDescription,
+               "MATERNAL", 
+               "Maternal Follow-up", 
+               now, 
+               generatedAt
+            ));
+            continue;
+         }
+      }
+      
+      // Rule 3: Routine (No visit > 90 days)
+      if (_daysSince(lastVisit?.visitDate, now) > 90) {
+         newDueItems.add(_createDueItem(
+           member, 
+           household?.locationDescription,
+           "ROUTINE", 
+           "Routine Home Visit", 
+           now, 
+           generatedAt
+         ));
       }
     }
 

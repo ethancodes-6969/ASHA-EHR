@@ -31,7 +31,7 @@ class SyncViewModel extends ChangeNotifier {
       
       // 3. Regenerate (Side Effect of Pull)
       // Per architecture rule: ViewModel triggers this, not Repository.
-      await _regenerateDueListUseCase();
+      Future.microtask(() => _regenerateDueListUseCase.call());
 
     } catch (e) {
       _lastError = e.toString();
