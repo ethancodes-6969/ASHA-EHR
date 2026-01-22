@@ -53,7 +53,7 @@ class _VisitContent extends StatelessWidget {
                     return Card(
                       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: ListTile(
-                        title: Text("${visit.coreCategory.name.toUpperCase()} - ${_formatDate(visit.visitDate)}"),
+                        title: Text("${visit.visitType.name} - ${_formatDate(visit.visitDate)}"),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

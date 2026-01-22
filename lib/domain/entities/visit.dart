@@ -1,19 +1,11 @@
 import 'package:equatable/equatable.dart';
-
-enum CoreVisitCategory {
-  routine,
-  maternal,
-  child,
-  ncd,
-  followUp,
-  survey
-}
+import 'package:asha_ehr/domain/enums/visit_type.dart';
 
 class Visit extends Equatable {
   final String id;
   final String memberId;
   final int visitDate;
-  final CoreVisitCategory coreCategory;
+  final VisitType visitType;
   final List<String> programTags;
   final String? notes;
   final int createdAt;
@@ -23,7 +15,7 @@ class Visit extends Equatable {
     required this.id,
     required this.memberId,
     required this.visitDate,
-    required this.coreCategory,
+    required this.visitType,
     required this.programTags,
     this.notes,
     required this.createdAt,
@@ -35,7 +27,7 @@ class Visit extends Equatable {
         id,
         memberId,
         visitDate,
-        coreCategory,
+        visitType,
         programTags,
         notes,
         createdAt,

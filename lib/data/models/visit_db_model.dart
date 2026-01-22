@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:asha_ehr/domain/entities/visit.dart';
+import 'package:asha_ehr/domain/enums/visit_type.dart';
 
 class VisitDbModel {
   static const String tableName = 'visits';
@@ -19,7 +21,7 @@ class VisitDbModel {
       colId: visit.id,
       colMemberId: visit.memberId,
       colVisitDate: visit.visitDate,
-      colCoreCategory: visit.coreCategory.name.toUpperCase(), // Enum to String
+      colCoreCategory: visit.visitType.name,
       colProgramTags: jsonEncode(visit.programTags), // List<String> to JSON
       colNotes: visit.notes,
       colCreatedAt: visit.createdAt,
@@ -33,7 +35,7 @@ class VisitDbModel {
       id: map[colId] as String,
       memberId: map[colMemberId] as String,
       visitDate: map[colVisitDate] as int,
-      coreCategory: _parseCategory(map[colCoreCategory] as String),
+      visitType: _parseVisitType(map[colCoreCategory] as String?),
       programTags: _parseTags(map[colProgramTags] as String?),
       notes: map[colNotes] as String?,
       createdAt: map[colCreatedAt] as int,
@@ -41,11 +43,17 @@ class VisitDbModel {
     );
   }
 
-  static CoreVisitCategory _parseCategory(String value) {
-    return CoreVisitCategory.values.firstWhere(
-      (e) => e.name.toUpperCase() == value.toUpperCase(),
-      orElse: () => CoreVisitCategory.routine, // Default fallback
-    );
+  static VisitType _parseVisitType(String? value) {
+    if (value == null) return VisitType.ROUTINE;
+    
+    try {
+      return VisitType.values.firstWhere(
+        (e) => e.name == value.toUpperCase(),
+      );
+    } catch (_) {
+      debugPrint('⚠️ Unknown VisitType "$value", defaulting to ROUTINE');
+      return VisitType.ROUTINE;
+    }
   }
 
   static List<String> _parseTags(String? jsonTags) {

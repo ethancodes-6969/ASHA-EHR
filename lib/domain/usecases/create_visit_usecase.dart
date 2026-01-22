@@ -1,4 +1,5 @@
 import 'package:asha_ehr/domain/entities/visit.dart';
+import 'package:asha_ehr/domain/enums/visit_type.dart';
 import 'package:asha_ehr/domain/repositories/i_visit_repository.dart';
 import 'package:asha_ehr/domain/usecases/regenerate_due_list_usecase.dart';
 import 'package:uuid/uuid.dart';
@@ -12,7 +13,7 @@ class CreateVisitUseCase {
   Future<void> call({
     required String memberId,
     required int visitDate,
-    required CoreVisitCategory coreCategory,
+    required VisitType visitType,
     List<String>? programTags,
     String? notes,
   }) async {
@@ -23,7 +24,7 @@ class CreateVisitUseCase {
       id: id,
       memberId: memberId,
       visitDate: visitDate,
-      coreCategory: coreCategory,
+      visitType: visitType,
       programTags: programTags ?? [],
       notes: notes,
       createdAt: now,

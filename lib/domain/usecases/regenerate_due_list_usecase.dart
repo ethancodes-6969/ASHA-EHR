@@ -2,6 +2,7 @@ import 'package:asha_ehr/domain/entities/due_item.dart';
 import 'package:asha_ehr/domain/entities/household.dart';
 import 'package:asha_ehr/domain/entities/member.dart';
 import 'package:asha_ehr/domain/entities/visit.dart';
+import 'package:asha_ehr/domain/enums/visit_type.dart';
 import 'package:asha_ehr/domain/repositories/i_due_list_repository.dart';
 import 'package:asha_ehr/domain/repositories/i_household_repository.dart';
 import 'package:asha_ehr/domain/repositories/i_member_repository.dart';
@@ -80,10 +81,10 @@ class RegenerateDueListUseCase {
       }
 
       // Rule 2: Maternal (Has MATERNAL visit AND > 30 days since last)
-      final hasMaternalHistory = memberVisits.any((v) => v.coreCategory == CoreVisitCategory.maternal);
+      final hasMaternalHistory = memberVisits.any((v) => v.visitType == VisitType.ANC || v.visitType == VisitType.PNC);
       if (hasMaternalHistory) {
          final lastMaternalVisit = memberVisits.firstWhere(
-           (v) => v.coreCategory == CoreVisitCategory.maternal, 
+           (v) => v.visitType == VisitType.ANC || v.visitType == VisitType.PNC, 
            orElse: () => memberVisits.first 
          );
          

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:asha_ehr/core/di/service_locator.dart';
 import 'package:asha_ehr/domain/entities/visit.dart';
+import 'package:asha_ehr/domain/enums/visit_type.dart';
 import 'package:asha_ehr/domain/usecases/create_visit_usecase.dart';
 
 class CreateVisitScreen extends StatefulWidget {
@@ -23,7 +24,7 @@ class _CreateVisitScreenState extends State<CreateVisitScreen> {
   final _tagsController = TextEditingController();
 
   DateTime _visitDate = DateTime.now();
-  CoreVisitCategory _category = CoreVisitCategory.routine;
+  VisitType _category = VisitType.ROUTINE;
   bool _isSaving = false;
 
   @override
@@ -64,7 +65,7 @@ class _CreateVisitScreenState extends State<CreateVisitScreen> {
       await createUseCase(
         memberId: widget.memberId,
         visitDate: _visitDate.millisecondsSinceEpoch,
-        coreCategory: _category,
+        visitType: _category,
         notes: _notesController.text.isEmpty ? null : _notesController.text,
         programTags: tags,
       );
@@ -106,13 +107,13 @@ class _CreateVisitScreenState extends State<CreateVisitScreen> {
               const Divider(),
 
               // Category Dropdown
-              DropdownButtonFormField<CoreVisitCategory>(
+              DropdownButtonFormField<VisitType>(
                 value: _category,
                 decoration: const InputDecoration(labelText: "Visit Category"),
-                items: CoreVisitCategory.values.map((cat) {
+                items: VisitType.values.map((cat) {
                   return DropdownMenuItem(
                     value: cat,
-                    child: Text(cat.name.toUpperCase()),
+                    child: Text(cat.name),
                   );
                 }).toList(),
                 onChanged: (val) => setState(() => _category = val!),
