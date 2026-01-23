@@ -12,6 +12,8 @@ import 'package:asha_ehr/presentation/theme/semantic_colors.dart';
 import 'package:asha_ehr/domain/enums/visit_type.dart';
 import 'package:asha_ehr/domain/entities/due_item.dart';
 
+import 'package:asha_ehr/l10n/app_localizations.dart';
+
 class DueListScreen extends StatelessWidget {
   const DueListScreen({super.key});
 
@@ -32,7 +34,7 @@ class _DueListContent extends StatelessWidget {
     final viewModel = context.watch<DueListViewModel>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Due Tasks")),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.dueVisits)),
       body: viewModel.isLoading
           ? const Center(child: CircularProgressIndicator())
           : viewModel.items.isEmpty

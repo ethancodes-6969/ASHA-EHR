@@ -8,6 +8,8 @@ import 'package:asha_ehr/presentation/theme/app_text_styles.dart';
 
 import 'package:asha_ehr/domain/enums/visit_type.dart';
 
+import 'package:asha_ehr/l10n/app_localizations.dart';
+
 class VisitListScreen extends StatelessWidget {
   final String memberId;
   final String memberName;
@@ -47,12 +49,12 @@ class _VisitContent extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Visits: $memberName"),
+        title: Text("${AppLocalizations.of(context)!.visits}: $memberName"),
       ),
       body: viewModel.isLoading
           ? const Center(child: CircularProgressIndicator())
           : viewModel.visits.isEmpty
-              ? const Center(child: Text("No visits recorded."))
+              ? Center(child: Text(AppLocalizations.of(context)!.noResults))
               : ListView.builder(
                   itemCount: viewModel.visits.length,
                   itemBuilder: (context, index) {

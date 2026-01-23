@@ -17,6 +17,7 @@ import 'package:asha_ehr/presentation/components/section_header.dart';
 import 'package:asha_ehr/presentation/components/app_card.dart';
 import 'package:asha_ehr/presentation/theme/app_text_styles.dart';
 import 'package:asha_ehr/presentation/components/sync_status_card.dart';
+import 'package:asha_ehr/l10n/app_localizations.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -45,16 +46,6 @@ class _DashboardContentState extends State<_DashboardContent> {
   @override
   void initState() {
     super.initState();
-    // OPTIONAL: Auto-trigger sync on startup if needed, 
-    // or just let the user do it manually as per Phase E1 "Manual Sync" focus.
-    // User request says "Add explicit user-controlled sync", avoiding auto-sync surprises.
-    // However, existing code triggered it. I'll keep it but it's safe now due to concurrency guards.
-    // Actually, Phase E1 goal is "Trust Controls", implies manual. 
-    // But "No regressions in auto-sync behavior". 
-    // The "auto-sync" on startup is technically existing behavior. 
-    // I will leave it, but maybe remove the explicit call if the VM handles it?
-    // The VM doesn't auto-sync on init.
-    // I'll keep the startup sync for now, it's good practice.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<SyncViewModel>().syncNow();
     });
@@ -66,7 +57,7 @@ class _DashboardContentState extends State<_DashboardContent> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ASHA Dashboard'),
+        title: Text(AppLocalizations.of(context)!.appTitle),
         actions: [
           const SyncIndicator(),
           IconButton(
@@ -89,10 +80,10 @@ class _DashboardContentState extends State<_DashboardContent> {
                 children: [
                   const SyncStatusCard(),
                   const SizedBox(height: AppSpacing.s16),
-                  const SectionHeader(title: "Today's Overview"),
+                  SectionHeader(title: AppLocalizations.of(context)!.todayOverview),
                   const SizedBox(height: AppSpacing.s12),
                   StatCard(
-                    label: "Visits Due Today",
+                    label: AppLocalizations.of(context)!.dueVisits,
                     value: (viewModel.stats['total'] ?? 0).toString(),
                     valueColor: SemanticColors.danger,
                     icon: Icons.warning_amber,
@@ -104,7 +95,7 @@ class _DashboardContentState extends State<_DashboardContent> {
                     },
                   ),
                   const SizedBox(height: AppSpacing.s24),
-                  const SectionHeader(title: "Navigation"),
+                  SectionHeader(title: AppLocalizations.of(context)!.navigation),
                   const SizedBox(height: AppSpacing.s12),
                   AppCard(
                     onTap: () {
@@ -117,7 +108,7 @@ class _DashboardContentState extends State<_DashboardContent> {
                       children: [
                         const Icon(Icons.people_alt, size: 32, color: AppColors.primary),
                         const SizedBox(width: AppSpacing.s16),
-                        const Text("Households Register", style: AppTextStyles.title),
+                        Text(AppLocalizations.of(context)!.householdsRegister, style: AppTextStyles.title),
                         const Spacer(),
                         const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.textSecondary),
                       ],

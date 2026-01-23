@@ -5,6 +5,8 @@ import 'package:asha_ehr/presentation/members/member_list_view_model.dart';
 import 'package:asha_ehr/presentation/create_member/create_member_screen.dart';
 import 'package:asha_ehr/presentation/visits/visit_list_screen.dart';
 
+import 'package:asha_ehr/l10n/app_localizations.dart';
+
 class MemberListScreen extends StatelessWidget {
   final String householdId;
   final String householdName;
@@ -48,7 +50,7 @@ class _MemberContent extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Text(
-                "Members: ${viewModel.members.length}",
+                AppLocalizations.of(context)!.membersCount(viewModel.members.length),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
@@ -67,18 +69,18 @@ class _MemberContent extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                       _buildStatItem("Visits", viewModel.visitCount.toString(), Colors.blue),
-                       _buildStatItem("Due Tasks", viewModel.dueCount.toString(), Colors.deepOrange),
+                       _buildStatItem(AppLocalizations.of(context)!.visits, viewModel.visitCount.toString(), Colors.blue),
+                       _buildStatItem(AppLocalizations.of(context)!.dueTasks, viewModel.dueCount.toString(), Colors.deepOrange),
                     ],
                   ),
                   const Divider(height: 24),
                   TextField(
-                    decoration: const InputDecoration(
-                      hintText: "Search Members",
-                      prefixIcon: Icon(Icons.search),
+                    decoration: InputDecoration(
+                      hintText: AppLocalizations.of(context)!.searchMembers,
+                      prefixIcon: const Icon(Icons.search),
                       border: InputBorder.none,
                       isDense: true,
-                      contentPadding: EdgeInsets.symmetric(vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
                     ),
                     onChanged: (val) => context.read<MemberListViewModel>().setSearchQuery(val),
                   ),
@@ -92,7 +94,7 @@ class _MemberContent extends StatelessWidget {
             child: viewModel.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : viewModel.members.isEmpty
-                    ? const Center(child: Text("No members found."))
+                    ? Center(child: Text(AppLocalizations.of(context)!.noMembersFound))
                     : ListView.builder(
                         itemCount: viewModel.members.length,
                         itemBuilder: (context, index) {

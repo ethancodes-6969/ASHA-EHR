@@ -7,6 +7,7 @@ import 'package:asha_ehr/presentation/theme/app_colors.dart';
 import 'package:asha_ehr/presentation/theme/app_spacing.dart';
 import 'package:asha_ehr/presentation/components/section_header.dart';
 import 'package:asha_ehr/presentation/theme/app_text_styles.dart';
+import 'package:asha_ehr/l10n/app_localizations.dart';
 
 class CreateVisitScreen extends StatefulWidget {
   final String memberId;
@@ -88,7 +89,7 @@ class _CreateVisitScreenState extends State<CreateVisitScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error saving: $e")),
+          SnackBar(content: Text(AppLocalizations.of(context)!.errorSaving(e.toString()))),
         );
       }
     } finally {
@@ -101,7 +102,7 @@ class _CreateVisitScreenState extends State<CreateVisitScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("New Visit: ${widget.memberName}")),
+      appBar: AppBar(title: Text("${AppLocalizations.of(context)!.recordVisit}: ${widget.memberName}")),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.s16),
         child: Form(
@@ -109,12 +110,12 @@ class _CreateVisitScreenState extends State<CreateVisitScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SectionHeader(title: "Visit Details", icon: Icons.event_note),
+              SectionHeader(title: AppLocalizations.of(context)!.visitDetails, icon: Icons.event_note),
               const SizedBox(height: AppSpacing.s16),
               // Date Picker
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: Text("Date: ${_visitDate.day}/${_visitDate.month}/${_visitDate.year}"),
+                title: Text("${AppLocalizations.of(context)!.visitDate}: ${_visitDate.day}/${_visitDate.month}/${_visitDate.year}"),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: _pickDate,
               ),
@@ -123,7 +124,7 @@ class _CreateVisitScreenState extends State<CreateVisitScreen> {
               // Category Dropdown
               DropdownButtonFormField<VisitType>(
                 value: _category,
-                decoration: const InputDecoration(labelText: "Visit Category"),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.visitType),
                 items: VisitType.values.map((cat) {
                   return DropdownMenuItem(
                     value: cat,
@@ -139,10 +140,10 @@ class _CreateVisitScreenState extends State<CreateVisitScreen> {
               // Notes
               TextFormField(
                 controller: _notesController,
-                decoration: const InputDecoration(
-                  labelText: "Notes (Observations)",
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.notes,
                   alignLabelWithHint: true,
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
                 maxLines: 3,
               ),
@@ -151,8 +152,8 @@ class _CreateVisitScreenState extends State<CreateVisitScreen> {
               // Tags
               TextFormField(
                 controller: _tagsController,
-                decoration: const InputDecoration(
-                  labelText: "Program Tags (comma separated)",
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.programTags,
                   hintText: "e.g., HIGH_RISK, ANAEMIC",
                 ),
               ),
@@ -174,7 +175,7 @@ class _CreateVisitScreenState extends State<CreateVisitScreen> {
                           height: 24, width: 24,
                           child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
                         )
-                      : const Text("Record Visit", style: AppTextStyles.button),
+                      : Text(AppLocalizations.of(context)!.recordVisit, style: AppTextStyles.button),
                 ),
               )
             ],

@@ -5,6 +5,8 @@ import 'package:asha_ehr/presentation/home/home_view_model.dart';
 import 'package:asha_ehr/presentation/create_household/create_household_screen.dart';
 import 'package:asha_ehr/presentation/members/member_list_screen.dart';
 
+import 'package:asha_ehr/l10n/app_localizations.dart';
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -26,18 +28,18 @@ class _HomeContent extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ASHA EHR - Households'),
+        title: Text(AppLocalizations.of(context)!.households),
       ),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
-              decoration: const InputDecoration(
-                labelText: "Search Households",
-                hintText: "Name or Location",
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.searchHouseholds,
+                hintText: AppLocalizations.of(context)!.searchHouseholdsHint,
+                prefixIcon: const Icon(Icons.search),
+                border: const OutlineInputBorder(),
               ),
               onChanged: (val) => context.read<HomeViewModel>().setSearchQuery(val),
             ),
@@ -46,7 +48,7 @@ class _HomeContent extends StatelessWidget {
             child: viewModel.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : viewModel.households.isEmpty
-                    ? const Center(child: Text("No results found."))
+                    ? Center(child: Text(AppLocalizations.of(context)!.noResults))
                     : ListView.builder(
                         itemCount: viewModel.households.length,
                         itemBuilder: (context, index) {
@@ -73,12 +75,12 @@ class _HomeContent extends StatelessWidget {
                                       final confirm = await showDialog<bool>(
                                         context: context,
                                         builder: (ctx) => AlertDialog(
-                                          title: const Text("Archive Household?"),
-                                          content: const Text("This will hide the household and its members. It can be restored by admin only."),
+                                          title: Text(AppLocalizations.of(context)!.archiveHousehold),
+                                          content: Text(AppLocalizations.of(context)!.archiveHouseholdConfirm),
                                           actions: [
-                                            TextButton(child: const Text("Cancel"), onPressed: () => Navigator.pop(ctx, false)),
+                                            TextButton(child: Text(AppLocalizations.of(context)!.cancel), onPressed: () => Navigator.pop(ctx, false)),
                                             TextButton(
-                                                child: const Text("Archive", style: TextStyle(color: Colors.red)),
+                                                child: Text(AppLocalizations.of(context)!.archive, style: const TextStyle(color: Colors.red)),
                                                 onPressed: () => Navigator.pop(ctx, true)
                                             ),
                                           ],
@@ -90,8 +92,8 @@ class _HomeContent extends StatelessWidget {
                                   }
                                 },
                                 itemBuilder: (context) => [
-                                  const PopupMenuItem(value: 'edit', child: Text("Edit")),
-                                  const PopupMenuItem(value: 'archive', child: Text("Archive", style: TextStyle(color: Colors.red))),
+                                  PopupMenuItem(value: 'edit', child: Text(AppLocalizations.of(context)!.edit)),
+                                  PopupMenuItem(value: 'archive', child: Text(AppLocalizations.of(context)!.archive, style: const TextStyle(color: Colors.red))),
                                 ],
                               ),
                               onTap: () {
@@ -113,6 +115,7 @@ class _HomeContent extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: AppLocalizations.of(context)!.createHousehold,
         onPressed: () async {
           final result = await Navigator.push(
             context,

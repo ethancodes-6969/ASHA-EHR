@@ -7,6 +7,7 @@ import 'package:asha_ehr/presentation/theme/app_colors.dart';
 import 'package:asha_ehr/presentation/theme/app_spacing.dart';
 import 'package:asha_ehr/presentation/components/section_header.dart';
 import 'package:asha_ehr/presentation/theme/app_text_styles.dart';
+import 'package:asha_ehr/l10n/app_localizations.dart';
 
 class CreateHouseholdScreen extends StatefulWidget {
   final Household? household;
@@ -68,7 +69,7 @@ class _CreateHouseholdScreenState extends State<CreateHouseholdScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error saving: $e")),
+          SnackBar(content: Text(AppLocalizations.of(context)!.errorSaving(e.toString()))),
         );
       }
     } finally {
@@ -82,24 +83,24 @@ class _CreateHouseholdScreenState extends State<CreateHouseholdScreen> {
   Widget build(BuildContext context) {
     final isEdit = widget.household != null;
     return Scaffold(
-      appBar: AppBar(title: Text(isEdit ? "Edit Household" : "Create Household")),
+      appBar: AppBar(title: Text(isEdit ? AppLocalizations.of(context)!.editHousehold : AppLocalizations.of(context)!.createHousehold)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.s16),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
-              const SectionHeader(title: "Household Details"),
+              SectionHeader(title: AppLocalizations.of(context)!.householdDetails),
               const SizedBox(height: AppSpacing.s16),
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: "Family Head Name *"),
-                validator: (v) => v == null || v.isEmpty ? "Required" : null,
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.familyHeadName),
+                validator: (v) => v == null || v.isEmpty ? AppLocalizations.of(context)!.required : null,
               ),
               const SizedBox(height: AppSpacing.s16),
               TextFormField(
                 controller: _locationController,
-                decoration: const InputDecoration(labelText: "Location / Landmark"),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.villageName),
               ),
               const SizedBox(height: AppSpacing.s32),
               SizedBox(
@@ -114,7 +115,7 @@ class _CreateHouseholdScreenState extends State<CreateHouseholdScreen> {
                   onPressed: _isSaving ? null : _save,
                   child: _isSaving
                       ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : Text(isEdit ? "Save Changes" : "Save Household", style: AppTextStyles.button),
+                      : Text(AppLocalizations.of(context)!.saveHousehold, style: AppTextStyles.button),
                 ),
               )
             ],

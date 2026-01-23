@@ -5,6 +5,8 @@ import 'package:asha_ehr/core/di/service_locator.dart';
 import 'package:asha_ehr/core/sync/device_attributes.dart';
 import 'package:asha_ehr/presentation/sync/sync_view_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:asha_ehr/l10n/app_localizations.dart';
+import 'package:asha_ehr/presentation/settings/locale_provider.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -47,15 +49,45 @@ class _SettingsContentState extends State<_SettingsContent> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Settings & Recovery")),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.settings)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text("Device Identity", style: TextStyle(fontWeight: FontWeight.bold)),
+          // Language Selector
+          Text(AppLocalizations.of(context)!.language, style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Card(
             child: ListTile(
-              title: const Text("ASHA Device ID"),
+              leading: const Icon(Icons.language),
+              title: Text(AppLocalizations.of(context)!.selectLanguage),
+              trailing: Consumer<LocaleProvider>(
+                builder: (context, provider, child) {
+                  return DropdownButton<String>(
+                    value: provider.locale?.languageCode ?? 'en',
+                    underline: Container(),
+                    items: const [
+                      DropdownMenuItem(value: 'en', child: Text('English')),
+                      DropdownMenuItem(value: 'hi', child: Text('हिंदी')),
+                      DropdownMenuItem(value: 'mr', child: Text('मराठी')),
+                    ],
+                    onChanged: (String? value) {
+                      if (value != null) {
+                        provider.setLocale(Locale(value));
+                      }
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Device Identity
+          Text(AppLocalizations.of(context)!.deviceIdentity, style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Card(
+            child: ListTile(
+              title: Text(AppLocalizations.of(context)!.ashaDeviceId),
               subtitle: Text(_deviceId ?? "Loading..."),
               trailing: IconButton(
                 icon: const Icon(Icons.copy),
@@ -63,7 +95,7 @@ class _SettingsContentState extends State<_SettingsContent> {
                   if (_deviceId != null) {
                     Clipboard.setData(ClipboardData(text: _deviceId!));
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("ID Copied")),
+                      SnackBar(content: Text(AppLocalizations.of(context)!.idCopied)),
                     );
                   }
                 },
@@ -71,18 +103,18 @@ class _SettingsContentState extends State<_SettingsContent> {
             ),
           ),
           const SizedBox(height: 32),
-          const Text("Danger Zone: Restore Data", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+          Text(AppLocalizations.of(context)!.dangerZone, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
           const SizedBox(height: 8),
-          const Text(
-            "If you reformatted your device, paste your OLD Device ID here to recover your data. WARNING: This will overwrite local data.",
-            style: TextStyle(color: Colors.grey),
+          Text(
+            AppLocalizations.of(context)!.restoreDataInstruction,
+            style: const TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _restoreController,
-            decoration: const InputDecoration(
-              labelText: "Enter Old Device ID",
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context)!.enterOldDeviceId,
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 16),
@@ -92,7 +124,7 @@ class _SettingsContentState extends State<_SettingsContent> {
               foregroundColor: Colors.white,
             ),
             icon: const Icon(Icons.restore),
-            label: const Text("RESTORE DATA"),
+            label: Text(AppLocalizations.of(context)!.restoreData),
             onPressed: () => _handleRestore(context),
           ),
         ],
@@ -107,11 +139,11 @@ class _SettingsContentState extends State<_SettingsContent> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Confirm Restore"),
-        content: Text("Are you sure you want to restore data for ID: $inputId?\n\nCURRENT DATA WILL BE MERGED."),
+        title: Text(AppLocalizations.of(context)!.confirmRestore),
+        content: Text(AppLocalizations.of(context)!.restoreConfirmMessage(inputId)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Cancel")),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Restore")),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(AppLocalizations.of(context)!.cancel)),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(AppLocalizations.of(context)!.restoreData)),
         ],
       ),
     );
@@ -127,7 +159,7 @@ class _SettingsContentState extends State<_SettingsContent> {
       final syncViewModel = context.read<SyncViewModel>();
 
       try {
-        messenger.showSnackBar(const SnackBar(content: Text("Restoring...")));
+        messenger.showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.restoring)));
         
         // Clear last sync to force full pull
         await prefs.remove('last_sync_timestamp');

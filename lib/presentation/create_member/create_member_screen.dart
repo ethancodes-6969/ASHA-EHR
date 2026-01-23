@@ -7,6 +7,7 @@ import 'package:asha_ehr/presentation/theme/app_colors.dart';
 import 'package:asha_ehr/presentation/theme/app_spacing.dart';
 import 'package:asha_ehr/presentation/components/section_header.dart';
 import 'package:asha_ehr/presentation/theme/app_text_styles.dart';
+import 'package:asha_ehr/l10n/app_localizations.dart';
 
 class CreateMemberScreen extends StatefulWidget {
   final String householdId;
@@ -121,7 +122,7 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error saving: $e")),
+          SnackBar(content: Text(AppLocalizations.of(context)!.errorSaving(e.toString()))),
         );
       }
     } finally {
@@ -135,7 +136,7 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
   Widget build(BuildContext context) {
     final isEdit = widget.member != null;
     return Scaffold(
-      appBar: AppBar(title: Text(isEdit ? "Edit Member" : "Add Member")),
+      appBar: AppBar(title: Text(isEdit ? AppLocalizations.of(context)!.editMember : AppLocalizations.of(context)!.createMember)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.s16),
         child: Form(
@@ -143,21 +144,21 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SectionHeader(title: "Personal Details", icon: Icons.person_outline),
+              SectionHeader(title: AppLocalizations.of(context)!.personalDetails, icon: Icons.person_outline),
               const SizedBox(height: AppSpacing.s16),
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: "Full Name *"),
-                validator: (v) => v == null || v.isEmpty ? "Required" : null,
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.fullName),
+                validator: (v) => v == null || v.isEmpty ? AppLocalizations.of(context)!.required : null,
               ),
               const SizedBox(height: AppSpacing.s16),
               DropdownButtonFormField<String>(
                 value: _gender,
-                decoration: const InputDecoration(labelText: "Gender"),
-                items: const [
-                  DropdownMenuItem(value: 'M', child: Text("Male")),
-                  DropdownMenuItem(value: 'F', child: Text("Female")),
-                  DropdownMenuItem(value: 'O', child: Text("Other")),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.gender),
+                items: [
+                  DropdownMenuItem(value: 'M', child: Text(AppLocalizations.of(context)!.male)),
+                  DropdownMenuItem(value: 'F', child: Text(AppLocalizations.of(context)!.female)),
+                  const DropdownMenuItem(value: 'O', child: Text("Other")),
                 ],
                 onChanged: (val) => setState(() => _gender = val!),
               ),
@@ -165,8 +166,8 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(_dob == null 
-                  ? "Date of Birth (Optional)" 
-                  : "DOB: ${_dob!.day}/${_dob!.month}/${_dob!.year}"
+                  ? "${AppLocalizations.of(context)!.dateOfBirth} (Optional)" 
+                  : "${AppLocalizations.of(context)!.dateOfBirth}: ${_dob!.day}/${_dob!.month}/${_dob!.year}"
                 ),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: () => _pickDate(type: 'dob'),
@@ -177,7 +178,7 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
                 const SizedBox(height: AppSpacing.s12),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text("Is Pregnant?"),
+                  title: Text(AppLocalizations.of(context)!.isPregnant),
                   value: _isPregnant,
                   activeColor: AppColors.primary,
                   onChanged: (val) => setState(() {
@@ -190,8 +191,8 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text(_lmpDate == null 
-                      ? "Select LMP Date *" 
-                      : "LMP: ${_lmpDate!.day}/${_lmpDate!.month}/${_lmpDate!.year}"
+                      ? "${AppLocalizations.of(context)!.lmpDate} *" 
+                      : "${AppLocalizations.of(context)!.lmpDate}: ${_lmpDate!.day}/${_lmpDate!.month}/${_lmpDate!.year}"
                     ),
                     trailing: const Icon(Icons.calendar_today, color: Colors.pink), 
                     onTap: () => _pickDate(type: 'lmp'),
@@ -200,8 +201,8 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
                    ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text(_deliveryDate == null 
-                      ? "Delivery Date (if recent)" 
-                      : "Delivered: ${_deliveryDate!.day}/${_deliveryDate!.month}/${_deliveryDate!.year}"
+                      ? "${AppLocalizations.of(context)!.deliveryDate} (if recent)" 
+                      : "${AppLocalizations.of(context)!.deliveryDate}: ${_deliveryDate!.day}/${_deliveryDate!.month}/${_deliveryDate!.year}"
                     ),
                     subtitle: _deliveryDate == null ? const Text("For PNC tracking") : null,
                     trailing: const Icon(Icons.child_friendly, color: AppColors.success),
@@ -224,7 +225,7 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
                           height: 24, width: 24, 
                           child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
                         )
-                      : Text(isEdit ? "Save Changes" : "Save Member", style: AppTextStyles.button),
+                      : Text(AppLocalizations.of(context)!.saveMember, style: AppTextStyles.button),
                 ),
               )
             ],

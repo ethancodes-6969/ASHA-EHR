@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:asha_ehr/presentation/sync/sync_view_model.dart';
 import 'package:asha_ehr/presentation/theme/app_colors.dart';
 import 'package:asha_ehr/presentation/theme/app_text_styles.dart';
+import 'package:asha_ehr/l10n/app_localizations.dart';
 
 class SyncStatusCard extends StatelessWidget {
   const SyncStatusCard({super.key});
@@ -30,12 +31,12 @@ class SyncStatusCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _getStatusTitle(status),
+                        _getStatusTitle(context, status),
                         style: AppTextStyles.title.copyWith(fontSize: 16),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _getLastSyncText(lastSync, status),
+                        _getLastSyncText(context, lastSync, status),
                         style: AppTextStyles.caption,
                       ),
                     ],
@@ -60,7 +61,7 @@ class SyncStatusCard extends StatelessWidget {
                             color: Colors.white,
                           ),
                         )
-                      : Text(status == SyncStatus.failed ? "Retry" : "Sync Now"),
+                      : Text(status == SyncStatus.failed ? AppLocalizations.of(context)!.retry : AppLocalizations.of(context)!.syncNow),
                 ),
               ],
             ),
@@ -114,27 +115,31 @@ class SyncStatusCard extends StatelessWidget {
     }
   }
 
-  String _getStatusTitle(SyncStatus status) {
+  String _getStatusTitle(BuildContext context, SyncStatus status) {
     switch (status) {
       case SyncStatus.syncing:
-        return "Syncing...";
+        return AppLocalizations.of(context)!.syncing;
       case SyncStatus.success:
-        return "Data Synced";
+        return AppLocalizations.of(context)!.syncComplete;
       case SyncStatus.failed:
-        return "Last sync failed — data is safe";
+        return AppLocalizations.of(context)!.syncFailed;
       case SyncStatus.idle:
-        return "Not Synced Yet";
+        return AppLocalizations.of(context)!.notSyncedYet;
     }
   }
 
-  String _getLastSyncText(DateTime? lastSync, SyncStatus status) {
-    if (status == SyncStatus.failed) return "Tap to retry";
-    if (status == SyncStatus.idle || lastSync == null) return "Tap Sync Now to start";
+  String _getLastSyncText(BuildContext context, DateTime? lastSync, SyncStatus status) {
+    if (status == SyncStatus.failed) return AppLocalizations.of(context)!.retry;
+    if (status == SyncStatus.idle || lastSync == null) return AppLocalizations.of(context)!.syncNow;
 
     final diff = DateTime.now().difference(lastSync);
+    // Simple localization for time, can be improved later
     if (diff.inSeconds < 60) return "Just now";
-    if (diff.inMinutes < 60) return "Last synced: ${diff.inMinutes} mins ago";
-    if (diff.inHours < 24) return "Last synced: ${diff.inHours} hours ago";
-    return "Last synced: ${diff.inDays} days ago";
+    final prefix = AppLocalizations.of(context)!.lastSynced;
+    
+    if (diff.inMinutes < 60) return "$prefix: ${diff.inMinutes} mins ago";
+    if (diff.inHours < 24) return "$prefix: ${diff.inHours} hours ago";
+    return "$prefix: ${diff.inDays} days ago";
   }
 }
+
