@@ -7,6 +7,7 @@ import 'package:asha_ehr/presentation/theme/app_colors.dart';
 import 'package:asha_ehr/presentation/theme/app_spacing.dart';
 import 'package:asha_ehr/presentation/theme/app_text_styles.dart';
 import 'package:asha_ehr/presentation/components/app_card.dart';
+import 'package:asha_ehr/presentation/theme/semantic_colors.dart';
 
 import 'package:asha_ehr/domain/enums/visit_type.dart';
 import 'package:asha_ehr/domain/entities/due_item.dart';
@@ -41,6 +42,9 @@ class _DueListContent extends StatelessWidget {
                   itemCount: viewModel.items.length,
                   itemBuilder: (context, index) {
                     final item = viewModel.items[index];
+                    final urgencyColor = _getUrgencyColor(item.dueDate);
+                    final visitType = _getVisitTypeFromItem(item);
+                    
                     return AppCard(
                       onTap: () {
                            Navigator.push(
@@ -48,46 +52,77 @@ class _DueListContent extends StatelessWidget {
                              MaterialPageRoute(builder: (context) => VisitListScreen(
                                memberId: item.memberId,
                                memberName: item.memberName,
-                               suggestedVisitType: _getVisitTypeFromItem(item),
+                               suggestedVisitType: visitType,
                              ))
                            );
                       },
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              _buildBadge(item.coreCategory),
-                              const SizedBox(width: AppSpacing.s8),
-                              Expanded(child: Text(item.programTag, style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold))),
-                              const Icon(Icons.calendar_today, size: 12, color: AppColors.highRisk),
-                              const SizedBox(width: 4),
-                              const Text("Action Required", style: TextStyle(fontSize: 12, color: AppColors.highRisk, fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.s12),
-                          Text(item.memberName, style: AppTextStyles.title),
-                          if (item.householdLocation != null) ...[
-                            const SizedBox(height: AppSpacing.s4),
-                            Text(item.householdLocation!, style: AppTextStyles.body),
+                      child: IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // 1. Semantic Left Border
+                            Container(
+                              width: 4,
+                              decoration: BoxDecoration(
+                                color: urgencyColor,
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(12),
+                                  bottomLeft: Radius.circular(12),
+                                ),
+                              ),
+                            ),
+                            // 2. Content
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        // Leading Icon
+                                        Icon(
+                                          _getIconForVisitType(visitType),
+                                          size: 24,
+                                          color: urgencyColor,
+                                        ),
+                                        const SizedBox(width: AppSpacing.s12),
+                                        
+                                        // Main Header content
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                               Text(item.memberName, style: AppTextStyles.title),
+                                               if (item.householdLocation != null) ...[
+                                                 const SizedBox(height: AppSpacing.s4),
+                                                 Text(item.householdLocation!, style: AppTextStyles.body.copyWith(color: AppColors.textSecondary)),
+                                               ],
+                                            ],
+                                          ),
+                                        ),
+                                        
+                                        // Date / Status
+                                        _buildUrgencyText(item.dueDate),
+                                      ],
+                                    ),
+                                    const SizedBox(height: AppSpacing.s12),
+                                    
+                                    // Tags & Badges
+                                    Row(
+                                      children: [
+                                         _buildVisitTypeBadge(visitType),
+                                         const SizedBox(width: AppSpacing.s8),
+                                         Expanded(child: Text(item.reason, style: AppTextStyles.caption.copyWith(fontStyle: FontStyle.italic), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
-                          const SizedBox(height: AppSpacing.s12),
-                          Container(
-                            padding: const EdgeInsets.all(AppSpacing.s8),
-                            decoration: BoxDecoration(
-                              color: AppColors.background,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Icon(Icons.info_outline, size: 16, color: AppColors.textSecondary),
-                                const SizedBox(width: AppSpacing.s8),
-                                Expanded(child: Text(item.reason, style: AppTextStyles.caption)),
-                              ],
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     );
                   },
@@ -104,27 +139,109 @@ class _DueListContent extends StatelessWidget {
     return VisitType.ROUTINE;
   }
 
-  Widget _buildBadge(String category) {
-    Color color = _getColorForCategory(category);
+  Color _getUrgencyColor(int dueDateMillis) {
+    final dueDate = DateTime.fromMillisecondsSinceEpoch(dueDateMillis);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    
+    // Overdue or Today -> Danger
+    if (dueDate.isBefore(today) || dueDate.isAtSameMomentAs(today)) {
+      return SemanticColors.danger;
+    }
+    
+    // Upcoming (within 7 days) -> Warning
+    final nextWeek = today.add(const Duration(days: 7));
+    if (dueDate.isBefore(nextWeek)) {
+      return SemanticColors.warning;
+    }
+    
+    // Future -> Neutral
+    return SemanticColors.neutral;
+  }
+
+  Widget _buildUrgencyText(int dueDateMillis) {
+    final color = _getUrgencyColor(dueDateMillis);
+    final dueDate = DateTime.fromMillisecondsSinceEpoch(dueDateMillis);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    
+    String text;
+    if (dueDate.isBefore(today)) {
+      final days = today.difference(dueDate).inDays;
+      text = "Overdue by $days days";
+    } else if (dueDate.isAtSameMomentAs(today)) {
+      text = "Due Today";
+    } else {
+      text = "Due ${_formatDate(dueDate)}";
+    }
+
+    return Row(
+      children: [
+        Icon(Icons.calendar_today, size: 12, color: color),
+        const SizedBox(width: 4),
+        Text(text, style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+
+  String _formatDate(DateTime dt) {
+    return "${dt.day}/${dt.month}";
+  }
+
+  Widget _buildVisitTypeBadge(VisitType type) {
+    Color color;
+    IconData icon;
+    String label = type.name;
+
+    switch (type) {
+      case VisitType.ANC:
+        color = SemanticColors.warning;
+        icon = Icons.pregnant_woman;
+        break;
+      case VisitType.PNC:
+        color = SemanticColors.success;
+        icon = Icons.woman;
+        break;
+      case VisitType.HBNC:
+      case VisitType.HBYC:
+        color = SemanticColors.warning;
+        icon = Icons.child_care;
+        break;
+      case VisitType.ROUTINE:
+        color = SemanticColors.neutral;
+        icon = Icons.home;
+        break;
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        border: Border.all(color: color),
-        borderRadius: BorderRadius.circular(4),
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16), // Pill shape
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
-      child: Text(
-        category,
-        style: AppTextStyles.caption.copyWith(color: color, fontWeight: FontWeight.bold),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: AppTextStyles.caption.copyWith(color: color, fontWeight: FontWeight.bold),
+          ),
+        ],
       ),
     );
   }
 
-  Color _getColorForCategory(String category) {
-    switch (category) {
-      case 'CHILD': return AppColors.info;
-      case 'MATERNAL': return const Color(0xFFD81B60); // Pink 600
-      case 'ROUTINE': return AppColors.success;
-      default: return AppColors.textSecondary;
+  IconData _getIconForVisitType(VisitType type) {
+    switch (type) {
+      case VisitType.ANC: return Icons.pregnant_woman;
+      case VisitType.PNC: return Icons.health_and_safety;
+      case VisitType.HBNC:
+      case VisitType.HBYC: return Icons.child_care;
+      case VisitType.ROUTINE:
+        return Icons.home;
     }
   }
 }

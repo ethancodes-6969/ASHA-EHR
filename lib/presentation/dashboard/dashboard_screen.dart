@@ -5,6 +5,8 @@ import 'package:asha_ehr/presentation/dashboard/dashboard_view_model.dart';
 import 'package:asha_ehr/presentation/home/home_screen.dart';
 import 'package:asha_ehr/presentation/due_list/due_list_screen.dart';
 
+import 'package:asha_ehr/presentation/theme/semantic_colors.dart';
+
 import 'package:asha_ehr/presentation/sync/sync_view_model.dart';
 import 'package:asha_ehr/presentation/sync/sync_indicator.dart';
 import 'package:asha_ehr/presentation/settings/settings_screen.dart';
@@ -92,8 +94,8 @@ class _DashboardContentState extends State<_DashboardContent> {
                   StatCard(
                     label: "Visits Due Today",
                     value: (viewModel.stats['total'] ?? 0).toString(),
-                    valueColor: AppColors.highRisk,
-                    icon: Icons.assignment_late,
+                    valueColor: SemanticColors.danger,
+                    icon: Icons.warning_amber,
                     onTap: () {
                        Navigator.push(
                         context,

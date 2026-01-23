@@ -1,6 +1,5 @@
 import 'package:asha_ehr/core/database/database_helper.dart';
 import 'package:asha_ehr/core/sync/device_attributes.dart';
-import 'package:asha_ehr/core/sync/device_attributes.dart';
 import 'package:asha_ehr/data/models/household_db_model.dart';
 import 'package:asha_ehr/data/models/member_db_model.dart';
 import 'package:asha_ehr/data/models/visit_db_model.dart';

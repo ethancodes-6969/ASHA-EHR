@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:asha_ehr/core/di/service_locator.dart';
 import 'package:asha_ehr/presentation/visits/visit_list_view_model.dart';
 import 'package:asha_ehr/presentation/create_visit/create_visit_screen.dart';
+import 'package:asha_ehr/presentation/theme/semantic_colors.dart';
+import 'package:asha_ehr/presentation/theme/app_text_styles.dart';
 
 import 'package:asha_ehr/domain/enums/visit_type.dart';
 
@@ -58,15 +60,28 @@ class _VisitContent extends StatelessWidget {
                     return Card(
                       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: ListTile(
-                        title: Text("${visit.visitType.name} - ${_formatDate(visit.visitDate)}"),
+                        leading: Icon(
+                           _getIconForVisitType(visit.visitType),
+                           color: SemanticColors.neutral,
+                        ),
+                        title: Row(
+                          children: [
+                            _buildVisitTypeBadge(visit.visitType),
+                            const SizedBox(width: 8),
+                            Text(_formatDate(visit.visitDate), style: AppTextStyles.body),
+                          ],
+                        ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             if (visit.notes != null && visit.notes!.isNotEmpty)
-                              Text(visit.notes!, maxLines: 2, overflow: TextOverflow.ellipsis),
-                            if (visit.programTags.isNotEmpty)
                               Padding(
                                 padding: const EdgeInsets.only(top: 4.0),
+                                child: Text(visit.notes!, maxLines: 2, overflow: TextOverflow.ellipsis),
+                              ),
+                            if (visit.programTags.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
                                 child: Wrap(
                                   spacing: 4,
                                   children: visit.programTags
@@ -106,4 +121,62 @@ class _VisitContent extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildVisitTypeBadge(VisitType type) {
+    Color color;
+    IconData icon;
+    String label = type.name;
+
+    switch (type) {
+      case VisitType.ANC:
+        color = SemanticColors.warning;
+        icon = Icons.pregnant_woman;
+        break;
+      case VisitType.PNC:
+        color = SemanticColors.success;
+        icon = Icons.woman; 
+        break;
+      case VisitType.HBNC:
+      case VisitType.HBYC:
+        color = SemanticColors.warning;
+        icon = Icons.child_care;
+        break;
+      case VisitType.ROUTINE:
+        color = SemanticColors.neutral;
+        icon = Icons.home;
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16), 
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: AppTextStyles.caption.copyWith(color: color, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getIconForVisitType(VisitType type) {
+    switch (type) {
+      case VisitType.ANC: return Icons.pregnant_woman;
+      case VisitType.PNC: return Icons.health_and_safety;
+      case VisitType.HBNC:
+      case VisitType.HBYC: return Icons.child_care;
+      case VisitType.ROUTINE:
+        return Icons.home;
+    }
+  }
 }
+

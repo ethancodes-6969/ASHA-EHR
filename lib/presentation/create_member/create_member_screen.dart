@@ -143,7 +143,7 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SectionHeader(title: "Personal Details"),
+              const SectionHeader(title: "Personal Details", icon: Icons.person_outline),
               const SizedBox(height: AppSpacing.s16),
               TextFormField(
                 controller: _nameController,
@@ -173,7 +173,7 @@ class _CreateMemberScreenState extends State<CreateMemberScreen> {
               ),
               if (_gender == 'F') ...[
                 const SizedBox(height: AppSpacing.s24),
-                const SectionHeader(title: "Clinical Information"),
+                const SectionHeader(title: "Clinical Information", icon: Icons.medical_services_outlined),
                 const SizedBox(height: AppSpacing.s12),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,

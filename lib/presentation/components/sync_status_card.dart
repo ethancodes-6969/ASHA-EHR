@@ -48,7 +48,7 @@ class SyncStatusCard extends StatelessWidget {
                       : () => context.read<SyncViewModel>().syncNow(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    disabledBackgroundColor: AppColors.primary.withOpacity(0.6),
+                    disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.6),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   ),
                   child: status == SyncStatus.syncing
@@ -70,7 +70,7 @@ class SyncStatusCard extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.highRisk.withOpacity(0.1),
+                  color: AppColors.highRisk.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -109,7 +109,6 @@ class SyncStatusCard extends StatelessWidget {
       case SyncStatus.failed:
         return const Icon(Icons.error, color: AppColors.highRisk, size: 32);
       case SyncStatus.idle:
-      default:
         return const Icon(Icons.cloud_queue, color: AppColors.textSecondary, size: 32);
     }
   }

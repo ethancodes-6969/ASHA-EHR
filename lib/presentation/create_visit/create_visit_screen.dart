@@ -109,7 +109,7 @@ class _CreateVisitScreenState extends State<CreateVisitScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SectionHeader(title: "Visit Details"),
+              const SectionHeader(title: "Visit Details", icon: Icons.event_note),
               const SizedBox(height: AppSpacing.s16),
               // Date Picker
               ListTile(
@@ -134,7 +134,7 @@ class _CreateVisitScreenState extends State<CreateVisitScreen> {
               ),
               const SizedBox(height: AppSpacing.s24),
 
-              const SectionHeader(title: "Findings"),
+              const SectionHeader(title: "Findings", icon: Icons.fact_check_outlined),
               const SizedBox(height: AppSpacing.s16),
               // Notes
               TextFormField(
