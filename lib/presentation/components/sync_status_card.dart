@@ -35,7 +35,7 @@ class SyncStatusCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _getLastSyncText(lastSync),
+                        _getLastSyncText(lastSync, status),
                         style: AppTextStyles.caption,
                       ),
                     ],
@@ -100,35 +100,41 @@ class SyncStatusCard extends StatelessWidget {
     switch (status) {
       case SyncStatus.syncing:
         return const SizedBox(
-          width: 28, 
-          height: 28, 
-          child: CircularProgressIndicator(strokeWidth: 3, color: AppColors.primary)
-        );
+            width: 28,
+            height: 28,
+            child: CircularProgressIndicator(strokeWidth: 3, color: AppColors.primary));
       case SyncStatus.success:
-        return const Icon(Icons.check_circle, color: AppColors.success, size: 32);
+        return const Icon(Icons.cloud_done, color: AppColors.success, size: 32);
       case SyncStatus.failed:
-        return const Icon(Icons.error, color: AppColors.highRisk, size: 32);
+        // cloud_off implies connection issue, which is most common
+        return const Icon(Icons.cloud_off, color: AppColors.highRisk, size: 32);
       case SyncStatus.idle:
-        return const Icon(Icons.cloud_queue, color: AppColors.textSecondary, size: 32);
+        // idle here means 'never synced' in the context of our VM logic (initially)
+        return const Icon(Icons.cloud_queue, color: AppColors.warning, size: 32);
     }
   }
 
   String _getStatusTitle(SyncStatus status) {
     switch (status) {
-      case SyncStatus.syncing: return "Syncing Data...";
-      case SyncStatus.success: return "Sync Complete";
-      case SyncStatus.failed: return "Sync Failed";
-      default: return "Data Sync";
+      case SyncStatus.syncing:
+        return "Syncing...";
+      case SyncStatus.success:
+        return "Data Synced";
+      case SyncStatus.failed:
+        return "Last sync failed — data is safe";
+      case SyncStatus.idle:
+        return "Not Synced Yet";
     }
   }
 
-  String _getLastSyncText(DateTime? lastSync) {
-    if (lastSync == null) return "Never synced";
+  String _getLastSyncText(DateTime? lastSync, SyncStatus status) {
+    if (status == SyncStatus.failed) return "Tap to retry";
+    if (status == SyncStatus.idle || lastSync == null) return "Tap Sync Now to start";
+
     final diff = DateTime.now().difference(lastSync);
-    
     if (diff.inSeconds < 60) return "Just now";
-    if (diff.inMinutes < 60) return "${diff.inMinutes} mins ago";
-    if (diff.inHours < 24) return "${diff.inHours} hours ago";
-    return "${diff.inDays} days ago";
+    if (diff.inMinutes < 60) return "Last synced: ${diff.inMinutes} mins ago";
+    if (diff.inHours < 24) return "Last synced: ${diff.inHours} hours ago";
+    return "Last synced: ${diff.inDays} days ago";
   }
 }
