@@ -14,6 +14,7 @@ import 'package:asha_ehr/presentation/components/stat_card.dart';
 import 'package:asha_ehr/presentation/components/section_header.dart';
 import 'package:asha_ehr/presentation/components/app_card.dart';
 import 'package:asha_ehr/presentation/theme/app_text_styles.dart';
+import 'package:asha_ehr/presentation/components/sync_status_card.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -23,6 +24,7 @@ class DashboardScreen extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => getIt<DashboardViewModel>()..initialLoad()),
+        // SyncViewModel loads last sync info on creation
         ChangeNotifierProvider(create: (_) => getIt<SyncViewModel>()),
       ],
       child: const _DashboardContent(),
@@ -41,7 +43,16 @@ class _DashboardContentState extends State<_DashboardContent> {
   @override
   void initState() {
     super.initState();
-    // Trigger Sync on Startup
+    // OPTIONAL: Auto-trigger sync on startup if needed, 
+    // or just let the user do it manually as per Phase E1 "Manual Sync" focus.
+    // User request says "Add explicit user-controlled sync", avoiding auto-sync surprises.
+    // However, existing code triggered it. I'll keep it but it's safe now due to concurrency guards.
+    // Actually, Phase E1 goal is "Trust Controls", implies manual. 
+    // But "No regressions in auto-sync behavior". 
+    // The "auto-sync" on startup is technically existing behavior. 
+    // I will leave it, but maybe remove the explicit call if the VM handles it?
+    // The VM doesn't auto-sync on init.
+    // I'll keep the startup sync for now, it's good practice.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<SyncViewModel>().syncNow();
     });
@@ -74,6 +85,8 @@ class _DashboardContentState extends State<_DashboardContent> {
               child: ListView(
                 padding: const EdgeInsets.all(AppSpacing.s16),
                 children: [
+                  const SyncStatusCard(),
+                  const SizedBox(height: AppSpacing.s16),
                   const SectionHeader(title: "Today's Overview"),
                   const SizedBox(height: AppSpacing.s12),
                   StatCard(

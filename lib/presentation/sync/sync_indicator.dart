@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:asha_ehr/presentation/sync/sync_view_model.dart';
+import 'package:asha_ehr/presentation/theme/app_colors.dart';
 
 class SyncIndicator extends StatelessWidget {
   const SyncIndicator({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Requires SyncViewModel provided above
     final viewModel = context.watch<SyncViewModel>();
+    final status = viewModel.status;
 
-    if (viewModel.isSyncing) {
+    if (status == SyncStatus.syncing) {
       return const Padding(
         padding: EdgeInsets.all(16.0),
         child: SizedBox(
@@ -24,22 +25,38 @@ class SyncIndicator extends StatelessWidget {
       );
     }
 
+    IconData icon;
+    Color color;
+
+    switch (status) {
+      case SyncStatus.failed:
+        icon = Icons.cloud_off;
+        color = AppColors.highRisk; 
+        break;
+      case SyncStatus.success:
+        icon = Icons.cloud_done;
+        color = Colors.white; 
+        break;
+      default:
+        icon = Icons.cloud_queue;
+        color = Colors.white;
+    }
+
     return IconButton(
-      icon: Icon(
-        viewModel.lastError != null ? Icons.cloud_off : Icons.cloud_done,
-        color: viewModel.lastError != null ? Colors.orangeAccent : Colors.white,
-      ),
+      icon: Icon(icon, color: color),
       onPressed: () {
-        context.read<SyncViewModel>().syncNow();
-        if (viewModel.lastError != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Last Sync Error: ${viewModel.lastError}')),
-          );
+        // READ-ONLY: Show status but do not trigger sync
+        String msg;
+        if (status == SyncStatus.failed) {
+          msg = "Sync Failed: ${viewModel.lastError ?? 'Unknown error'}";
+        } else if (status == SyncStatus.success) {
+          msg = "Sync Complete";
         } else {
-             ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Syncing...')),
-          );
+          msg = "Sync Idle";
         }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg)),
+        );
       },
     );
   }

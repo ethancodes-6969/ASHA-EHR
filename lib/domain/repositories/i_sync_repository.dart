@@ -9,4 +9,10 @@ abstract class ISyncRepository {
 
   /// Gets the last sync timestamp.
   Future<int> getLastSyncTimestamp();
+
+  /// Sets the last sync error message (or null if success).
+  Future<void> setLastError(String? error);
+
+  /// Gets the last persisted error message.
+  Future<String?> getLastError();
 }

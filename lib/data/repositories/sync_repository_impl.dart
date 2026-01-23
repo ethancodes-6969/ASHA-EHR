@@ -1,6 +1,6 @@
 import 'package:asha_ehr/core/database/database_helper.dart';
 import 'package:asha_ehr/core/sync/device_attributes.dart';
-import 'package:asha_ehr/data/models/due_item_db_model.dart';
+import 'package:asha_ehr/core/sync/device_attributes.dart';
 import 'package:asha_ehr/data/models/household_db_model.dart';
 import 'package:asha_ehr/data/models/member_db_model.dart';
 import 'package:asha_ehr/data/models/visit_db_model.dart';
@@ -139,5 +139,21 @@ class SyncRepositoryImpl implements ISyncRepository {
   Future<int> getLastSyncTimestamp() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(_prefLastSync) ?? 0;
+  }
+
+  @override
+  Future<void> setLastError(String? error) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (error == null) {
+      await prefs.remove('last_sync_error');
+    } else {
+      await prefs.setString('last_sync_error', error);
+    }
+  }
+
+  @override
+  Future<String?> getLastError() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('last_sync_error');
   }
 }
